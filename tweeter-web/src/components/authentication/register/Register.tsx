@@ -3,11 +3,10 @@ import "bootstrap/dist/css/bootstrap.css";
 import { ChangeEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
-import { Buffer } from "buffer";
 import useToastListener from "../../toaster/ToastListenerHook";
 import AuthenticationField from "../AuthenticationField";
 import useUserInfo from "../../userInfo/UserInfoHook";
+import { RegisterPresenter, RegisterView } from "../../../presenters/RegisterPresenter";
 
 const Register = () => {
   const [firstName, setFirstName] = useState("");
@@ -23,6 +22,22 @@ const Register = () => {
   const navigate = useNavigate();
   const { updateUserInfo } = useUserInfo();
   const { displayErrorMessage } = useToastListener();
+
+  const listener: RegisterView = {
+    updateUserInfo: updateUserInfo,
+    navigate: (path: string) => {
+      navigate(path);
+    },
+    setIsLoading: setIsLoading,
+    displayErrorMessage: displayErrorMessage,
+    setImageUrl: (imageUrl: string) => {
+      setImageUrl(imageUrl);
+    },
+    setImageBytes: setImageBytes,
+    setImageFileExtension: setImageFileExtension
+  };
+
+  const [presenter] = useState(new RegisterPresenter(listener));
 
   const checkSubmitButtonStatus = (): boolean => {
     return (
@@ -43,89 +58,19 @@ const Register = () => {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    handleImageFile(file);
-  };
-
-  const handleImageFile = (file: File | undefined) => {
-    if (file) {
-      setImageUrl(URL.createObjectURL(file));
-
-      const reader = new FileReader();
-      reader.onload = (event: ProgressEvent<FileReader>) => {
-        const imageStringBase64 = event.target?.result as string;
-
-        // Remove unnecessary file metadata from the start of the string.
-        const imageStringBase64BufferContents =
-          imageStringBase64.split("base64,")[1];
-
-        const bytes: Uint8Array = Buffer.from(
-          imageStringBase64BufferContents,
-          "base64"
-        );
-
-        setImageBytes(bytes);
-      };
-      reader.readAsDataURL(file);
-
-      // Set image file extension (and move to a separate method)
-      const fileExtension = getFileExtension(file);
-      if (fileExtension) {
-        setImageFileExtension(fileExtension);
-      }
-    } else {
-      setImageUrl("");
-      setImageBytes(new Uint8Array());
-    }
-  };
-
-  const getFileExtension = (file: File): string | undefined => {
-    return file.name.split(".").pop();
+    presenter.handleImageFile(file);
   };
 
   const doRegister = async () => {
-    try {
-      setIsLoading(true);
-
-      const [user, authToken] = await register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        imageBytes,
-        imageFileExtension
-      );
-
-      updateUserInfo(user, user, authToken, rememberMe);
-      navigate("/");
-    } catch (error) {
-      displayErrorMessage(
-        `Failed to register user because of exception: ${error}`
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const register = async (
-    firstName: string,
-    lastName: string,
-    alias: string,
-    password: string,
-    userImageBytes: Uint8Array,
-    imageFileExtension: string
-  ): Promise<[User, AuthToken]> => {
-    // Not neded now, but will be needed when you make the request to the server in milestone 3
-    const imageStringBase64: string =
-      Buffer.from(userImageBytes).toString("base64");
-
-    // TODO: Replace with the result of calling the server
-    const user = FakeData.instance.firstUser;
-
-    if (user === null) {
-      throw new Error("Invalid registration");
-    }
-
-    return [user, FakeData.instance.authToken];
+    presenter.doRegister(
+      firstName,
+      lastName,
+      alias,
+      password,
+      imageBytes,
+      imageFileExtension,
+      rememberMe
+    )
   };
 
   const inputFieldGenerator = () => {
