@@ -15,6 +15,9 @@ import StoryScroller from "./components/mainLayout/StoryScroller";
 import { AuthToken, User, FakeData } from "tweeter-shared";
 import UserItemScroller from "./components/mainLayout/UserItemScroller";
 import useUserInfo from "./components/userInfo/UserInfoHook";
+import { UserItemView } from "./presenters/UserItemPresenter";
+import { FolloweePresenter } from "./presenters/FolloweePresenter";
+import { FollowerPresenter } from "./presenters/FollowerPresenter";
 
 const App = () => {
   const { currentUser, authToken } = useUserInfo();
@@ -69,8 +72,7 @@ const AuthenticatedRoutes = () => {
           element={
             <UserItemScroller
               key={1}
-              loadItems={loadMoreFollowees}
-                itemDescription="followees"
+              presenterGenerator={(view: UserItemView) => new FolloweePresenter(view)}
             />
           }
         />
@@ -79,8 +81,7 @@ const AuthenticatedRoutes = () => {
           element={
             <UserItemScroller
               key={2} 
-              loadItems={loadMoreFollowers}
-                itemDescription="followers"
+              presenterGenerator={(view: UserItemView) => new FollowerPresenter(view)}
             />
           }
         />
