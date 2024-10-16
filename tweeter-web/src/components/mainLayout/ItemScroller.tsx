@@ -1,21 +1,23 @@
-import { Status } from "tweeter-shared";
 import { useState, useEffect } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
-import StatusItem from "../statusItem/StatusItem";
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/UserInfoHook";
-import { StatusItemPresenter, StatusItemView } from "../../presenters/StatusItemPresenter";
+import {
+  PagedItemPresenter,
+  PagedItemView,
+} from "../../presenters/PagedItemPresenter";
 
 export const PAGE_SIZE = 10;
 
-interface Props {
-  presenterGenerator: (view: StatusItemView) => StatusItemPresenter;
+interface Props<A, B> {
+  presenterGenerator: (view: PagedItemView<A>) => PagedItemPresenter<A, B>;
+  itemComponentGenerator: (item: A) => JSX.Element;
 }
 
-const StatusItemScroller = (props: Props) => {
+function ItemScroller<A, B>(props: Props<A, B>) {
   const { displayErrorMessage } = useToastListener();
-  const [items, setItems] = useState<Status[]>([]);
-  const [newItems, setNewItems] = useState<Status[]>([]);
+  const [items, setItems] = useState<A[]>([]);
+  const [newItems, setNewItems] = useState<A[]>([]);
   const [changedDisplayedUser, setChangedDisplayedUser] = useState(true);
 
   const { displayedUser, authToken } = useUserInfo();
@@ -46,8 +48,8 @@ const StatusItemScroller = (props: Props) => {
     presenter.reset();
   };
 
-  const listener: StatusItemView = {
-    addItems: (newItems: Status[]) => setNewItems(newItems),
+  const listener: PagedItemView<A> = {
+    addItems: (newItems: A[]) => setNewItems(newItems),
     displayErrorMessage: displayErrorMessage,
   };
 
@@ -72,12 +74,12 @@ const StatusItemScroller = (props: Props) => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <StatusItem status={item} />
+            {props.itemComponentGenerator(item)}
           </div>
         ))}
       </InfiniteScroll>
     </div>
   );
-};
+}
 
-export default StatusItemScroller;
+export default ItemScroller;

@@ -1,41 +1,38 @@
 import { AuthToken, Status, User } from "tweeter-shared";
 import { StatusService } from "../model/service/StatusService";
+import { Presenter, MessageView } from "./Presenter";
 
-export interface PostStatusView {
-    displayInfoMessage: (message: string, duration: number) => void;
-    clearLastInfoMessage: () => void;
-    displayErrorMessage: (message: string) => void;
-    setIsLoading: (isLoading: boolean) => void;
-    setPost: (post: string) => void;
+export interface PostStatusView extends MessageView {
+  setIsLoading: (isLoading: boolean) => void;
+  setPost: (post: string) => void;
 }
 
-export class PostStatusPresenter {
-    private _view: PostStatusView;
-    private statusService: StatusService;
+export class PostStatusPresenter extends Presenter<PostStatusView> {
+  private statusService: StatusService;
 
-    public constructor(view: PostStatusView) {
-        this._view = view;
-        this.statusService = new StatusService();
-    }
+  public constructor(view: PostStatusView) {
+    super(view);
+    this.statusService = new StatusService();
+  }
 
-    public async submitPost(post: string, currentUser: User, authToken: AuthToken) {
-        try {
-            this._view.setIsLoading(true);
-            this._view.displayInfoMessage("Posting status...", 0);
+  public async submitPost(
+    post: string,
+    currentUser: User,
+    authToken: AuthToken
+  ) {
+    this.doFailureReportingOperation(async () => {
+      this.view.setIsLoading(true);
+      this.view.displayInfoMessage("Posting status...", 0);
 
-            const status = new Status(post, currentUser!, Date.now());
+      const status = new Status(post, currentUser!, Date.now());
 
-            await this.statusService.postStatus(authToken, status);
+      await this.statusService.postStatus(authToken, status);
 
-            this._view.setPost("");
-            this._view.displayInfoMessage("Status posted!", 2000);
-        } catch (error) {
-            this._view.displayErrorMessage(
-                `Failed to post the status because of exception: ${error}`
-            );
-        } finally {
-            this._view.clearLastInfoMessage();
-            this._view.setIsLoading(false);
-        }
-    };
+      this.view.setPost("");
+      this.view.displayInfoMessage("Status posted!", 2000);
+    }, "post the status").finally(() => {
+      this.view.clearLastInfoMessage();
+      this.view.setIsLoading(false);
+    });
+  }
 }
