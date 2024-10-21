@@ -48,7 +48,7 @@ describe("NavbarPresenter", () => {
     // expect(capturedAuthToken).toEqual(authToken);
   });
 
-  it("tells the view to clear the last info message, clear the user info, and navigate to the login page", async () => {
+  it("tells the view to clear the last info message, clear the user info, and navigate to the login page when logout succeeds", async () => {
     await navbarPresenter.logout(authToken);
 
     verify(mockNavbarView.clearLastInfoMessage()).once();
@@ -60,11 +60,6 @@ describe("NavbarPresenter", () => {
     when(mockUserService.logout(authToken)).thenThrow(error);
 
     await navbarPresenter.logout(authToken);
-
-    let [capturedErrorMessage] = capture(
-      mockNavbarView.displayErrorMessage
-    ).last();
-    console.log(capturedErrorMessage);
 
     verify(
       mockNavbarView.displayErrorMessage(
