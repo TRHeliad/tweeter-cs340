@@ -20,7 +20,8 @@ export class Presenter<V extends View> {
 
   public async doFailureReportingOperation(
     operation: () => Promise<void>,
-    operationDescription: string
+    operationDescription: string,
+    onFailure?: (() => void) | undefined
   ): Promise<void> {
     try {
       await operation();
@@ -30,6 +31,7 @@ export class Presenter<V extends View> {
           (error as Error).message
         }`
       );
+      if (onFailure !== undefined) onFailure();
     }
   }
 }
