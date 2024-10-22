@@ -7,11 +7,10 @@ import {
   PostStatusView,
 } from "../../presenters/PostStatusPresenter";
 import { UserInfo } from "../userInfo/UserInfoProvider";
-import { AuthToken, User } from "tweeter-shared";
 
 interface Props {
   presenter?: PostStatusPresenter;
-  userInfo?: { currentUser: User; authToken: AuthToken };
+  userInfo?: UserInfo;
 }
 
 const PostStatus = (props: Props) => {

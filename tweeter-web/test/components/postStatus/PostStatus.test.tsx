@@ -6,15 +6,34 @@ import { instance, mock, verify } from "ts-mockito";
 import { PostStatusPresenter } from "../../../src/presenters/PostStatusPresenter";
 import PostStatus from "../../../src/components/postStatus/PostStatus";
 import { AuthToken, User } from "tweeter-shared";
+import useUserInfo from "../../../src/components/userInfo/UserInfoHook";
+import { UserInfo } from "../../../src/components/userInfo/UserInfoProvider";
+
+jest.mock("../../../src/components/userInfo/UserInfoHook", () => ({
+  ...jest.requireActual("../../../src/components/userInfo/UserInfoHook"),
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 describe("PostStatus Component", () => {
-  const currentUser: User = new User("a", "a", "a", "");
-  const authToken: AuthToken = new AuthToken("abc", Date.now());
+  let mockUserInstance: User;
+  let mockAuthTokenInstance: AuthToken;
+
+  beforeAll(() => {
+    const mockUser = mock<User>();
+    const mockAuthToken = mock<AuthToken>();
+    mockUserInstance = instance(mockUser);
+    mockAuthTokenInstance = instance(mockAuthToken);
+
+    (useUserInfo as jest.Mock).mockReturnValue({
+      currentUser: mockUserInstance,
+      authToken: mockAuthTokenInstance,
+    });
+  });
 
   it("starts with the post status and clear buttons disabled", () => {
     const { postStatusButton, clearButton } = renderLoginAndGetElement(
-      currentUser,
-      authToken
+      useUserInfo()
     );
 
     expect(postStatusButton).toBeDisabled();
@@ -23,7 +42,7 @@ describe("PostStatus Component", () => {
 
   it("enables post status and clear buttons when text field has text", async () => {
     const { postStatusButton, clearButton, textField, user } =
-      renderLoginAndGetElement(currentUser, authToken);
+      renderLoginAndGetElement(useUserInfo());
 
     await user.type(textField, "abc123");
     expect(postStatusButton).toBeEnabled();
@@ -32,7 +51,7 @@ describe("PostStatus Component", () => {
 
   it("post status and clear buttons are disabled when text field is cleared", async () => {
     const { postStatusButton, clearButton, textField, user } =
-      renderLoginAndGetElement(currentUser, authToken);
+      renderLoginAndGetElement(useUserInfo());
 
     await user.type(textField, "abc123");
     expect(postStatusButton).toBeEnabled();
@@ -48,8 +67,7 @@ describe("PostStatus Component", () => {
     const mockPresenterInstance = instance(mockPresenter);
 
     const { postStatusButton, textField, user } = renderLoginAndGetElement(
-      currentUser,
-      authToken,
+      useUserInfo(),
       mockPresenterInstance
     );
 
@@ -58,28 +76,30 @@ describe("PostStatus Component", () => {
 
     await user.click(postStatusButton);
 
-    verify(mockPresenter.submitPost(postText, currentUser, authToken)).once();
+    verify(
+      mockPresenter.submitPost(
+        postText,
+        mockUserInstance,
+        mockAuthTokenInstance
+      )
+    ).once();
   });
 });
 
 const renderPostStatus = (
-  currentUser: User,
-  authToken: AuthToken,
+  userInfo: UserInfo,
   presenter?: PostStatusPresenter
 ) => {
-  return render(
-    <PostStatus presenter={presenter} userInfo={{ currentUser, authToken }} />
-  );
+  return render(<PostStatus presenter={presenter} userInfo={userInfo} />);
 };
 
 const renderLoginAndGetElement = (
-  currentUser: User,
-  authToken: AuthToken,
+  userInfo: UserInfo,
   presenter?: PostStatusPresenter
 ) => {
   const user = userEvent.setup();
 
-  renderPostStatus(currentUser, authToken, presenter);
+  renderPostStatus(userInfo, presenter);
 
   const postStatusButton = screen.getByRole("button", { name: /Post Status/i });
   const clearButton = screen.getByRole("button", { name: /Clear/i });
