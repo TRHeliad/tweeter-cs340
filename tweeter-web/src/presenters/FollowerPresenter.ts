@@ -1,10 +1,5 @@
 import { AuthToken, User } from "tweeter-shared";
-import { FollowService } from "../model/service/FollowService";
-import {
-  PAGE_SIZE,
-  UserItemPresenter,
-  UserItemView,
-} from "./UserItemPresenter";
+import { PAGE_SIZE, UserItemPresenter } from "./UserItemPresenter";
 
 export class FollowerPresenter extends UserItemPresenter {
   protected getMoreItems(
