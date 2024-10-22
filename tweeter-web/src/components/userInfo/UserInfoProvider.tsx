@@ -4,7 +4,7 @@ import { User, AuthToken } from "tweeter-shared";
 const CURRENT_USER_KEY: string = "CurrentUserKey";
 const AUTH_TOKEN_KEY: string = "AuthTokenKey";
 
-interface UserInfo {
+export interface UserInfo {
   currentUser: User | null;
   displayedUser: User | null;
   authToken: AuthToken | null;
