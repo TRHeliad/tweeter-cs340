@@ -10,6 +10,7 @@ import { LoginPresenter, LoginView } from "../../../presenters/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenter?: LoginPresenter;
 }
 
 const Login = (props: Props) => {
@@ -32,7 +33,7 @@ const Login = (props: Props) => {
     originalUrl: props.originalUrl,
   };
 
-  const [presenter] = useState(new LoginPresenter(listener));
+  const [presenter] = useState(props.presenter ?? new LoginPresenter(listener));
 
   const checkSubmitButtonStatus = (): boolean => {
     return !alias || !password;
@@ -45,30 +46,32 @@ const Login = (props: Props) => {
   };
 
   const doLogin = async () => {
-    presenter.doLogin(alias, password, rememberMe)
+    presenter.doLogin(alias, password, rememberMe);
   };
 
   const inputFieldGenerator = () => {
     return (
       <>
         <AuthenticationField
-            label="Alias"
-            type="text"
-            className="form-control"
-            size={50}
-            id="aliasInput"
-            placeholder="name@example.com"
-            onKeyDown={processKeyEvent}
-            onChange={(event) => setAlias(event.target.value)}
+          label="Alias"
+          type="text"
+          className="form-control"
+          size={50}
+          id="aliasInput"
+          aria-label="alias"
+          placeholder="name@example.com"
+          onKeyDown={processKeyEvent}
+          onChange={(event) => setAlias(event.target.value)}
         />
         <AuthenticationField
-            label="Password"
-            type="password"
-            className="form-control bottom"
-            id="passwordInput"
-            placeholder="Password"
-            onKeyDown={processKeyEvent}
-            onChange={(event) => setPassword(event.target.value)}
+          label="Password"
+          type="password"
+          className="form-control bottom"
+          id="passwordInput"
+          aria-label="password"
+          placeholder="Password"
+          onKeyDown={processKeyEvent}
+          onChange={(event) => setPassword(event.target.value)}
         />
       </>
     );
