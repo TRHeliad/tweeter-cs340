@@ -2,12 +2,10 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
-import { anything, capture, instance, mock, verify } from "ts-mockito";
+import { instance, mock, verify } from "ts-mockito";
 import { PostStatusPresenter } from "../../../src/presenters/PostStatusPresenter";
 import PostStatus from "../../../src/components/postStatus/PostStatus";
-import { UserInfo } from "../../../src/components/userInfo/UserInfoProvider";
 import { AuthToken, User } from "tweeter-shared";
-import useUserInfo from "../../../src/components/userInfo/UserInfoHook";
 
 describe("PostStatus Component", () => {
   const currentUser: User = new User("a", "a", "a", "");
@@ -49,8 +47,11 @@ describe("PostStatus Component", () => {
     const mockPresenter = mock<PostStatusPresenter>();
     const mockPresenterInstance = instance(mockPresenter);
 
-    const { postStatusButton, clearButton, textField, user } =
-      renderLoginAndGetElement(currentUser, authToken, mockPresenterInstance);
+    const { postStatusButton, textField, user } = renderLoginAndGetElement(
+      currentUser,
+      authToken,
+      mockPresenterInstance
+    );
 
     const postText = "abc123";
     await user.type(textField, postText);

@@ -4,15 +4,7 @@ import {
   NavbarView,
 } from "../../src/presenters/NavbarPresenter";
 
-import {
-  anything,
-  capture,
-  instance,
-  mock,
-  spy,
-  verify,
-  when,
-} from "ts-mockito";
+import { instance, mock, spy, verify, when } from "ts-mockito";
 import { UserService } from "../../src/model/service/UserService";
 
 describe("NavbarPresenter", () => {
@@ -43,9 +35,6 @@ describe("NavbarPresenter", () => {
   it("calls logout on the user service with the correct auth token", async () => {
     await navbarPresenter.logout(authToken);
     verify(mockUserService.logout(authToken)).once();
-
-    // let [capturedAuthToken] = capture(mockUserService.logout).last();
-    // expect(capturedAuthToken).toEqual(authToken);
   });
 
   it("tells the view to clear the last info message, clear the user info, and navigate to the login page when logout succeeds", async () => {
