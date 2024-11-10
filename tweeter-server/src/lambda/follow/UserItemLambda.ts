@@ -1,28 +1,14 @@
-import {
-  PagedUserItemRequest,
-  PagedUserItemResponse,
-  UserDto,
-} from "tweeter-shared";
+import { PagedItemRequest, PagedItemResponse, UserDto } from "tweeter-shared";
+import { PagedItemLambda } from "../PagedItemLambda";
 
 export const UserItemLambda = async (
-  request: PagedUserItemRequest,
+  request: PagedItemRequest<UserDto>,
   loadMethod: (
     token: string,
     userAlias: string,
     pageSize: number,
     lastItem: UserDto | null
   ) => Promise<[UserDto[], boolean]>
-): Promise<PagedUserItemResponse> => {
-  const [items, hasMore] = await loadMethod(
-    request.token,
-    request.userAlias,
-    request.pageSize,
-    request.lastItem
-  );
-  return {
-    success: true,
-    message: null,
-    items: items,
-    hasMore: hasMore,
-  };
+): Promise<PagedItemResponse<UserDto>> => {
+  return PagedItemLambda(request, loadMethod);
 };

@@ -1,8 +1,6 @@
 import {
   GetFollowCountRequest,
   GetFollowCountResponse,
-  PagedUserItemRequest,
-  PagedUserItemResponse,
   UserDto,
 } from "tweeter-shared";
 
