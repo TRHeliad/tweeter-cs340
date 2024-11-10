@@ -8,6 +8,6 @@ export const handler = async (
   const followService = new FollowService();
   return UserItemLambda(
     request,
-    followService.loadMoreFollowees.bind(followService)
+    followService.loadMoreFollowers.bind(followService)
   );
 };

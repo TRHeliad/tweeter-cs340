@@ -2,5 +2,6 @@ BUCKET='tweeter-lambda-deploy'
 LAMBDA_ROLE='arn:aws:iam::954680681479:role/TweeterLambda'
 EDIT_LAMBDALIST='
 tweeterGetFollowees | lambda/follow/GetFolloweesLambda.handler
+tweeterGetFollowers | lambda/follow/GetFollowersLambda.handler
 '
 LAMBDALAYER_ARN='arn:aws:lambda:us-west-2:954680681479:layer:tweeterLambdaLayer:2'
