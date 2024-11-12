@@ -1,6 +1,8 @@
 import { v4 as uuid } from "uuid";
 import { AuthTokenDto } from "../dto/AuthTokenDto";
-export class AuthToken {
+import { DtoConvertible } from "./DtoConvertible";
+
+export class AuthToken extends DtoConvertible<AuthTokenDto> {
   private _token: string;
   private _timestamp: number;
 
@@ -30,6 +32,7 @@ export class AuthToken {
   }
 
   public constructor(token: string, timestamp: number) {
+    super();
     this._token = token;
     this._timestamp = timestamp;
   }

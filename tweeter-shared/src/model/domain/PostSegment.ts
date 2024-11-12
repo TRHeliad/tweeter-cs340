@@ -1,4 +1,5 @@
 import { PostSegmentDto } from "../dto/PostSegmentDto";
+import { DtoConvertible } from "./DtoConvertible";
 
 export enum Type {
   text = "Text",
@@ -7,7 +8,7 @@ export enum Type {
   newline = "Newline",
 }
 
-export class PostSegment {
+export class PostSegment extends DtoConvertible<PostSegmentDto> {
   private _text: string;
   private _startPosition: number;
   private _endPosition: number;
@@ -19,6 +20,7 @@ export class PostSegment {
     endPosition: number,
     type: Type
   ) {
+    super();
     this._text = text;
     this._startPosition = startPosition;
     this._endPosition = endPosition;

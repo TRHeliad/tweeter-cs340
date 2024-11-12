@@ -1,15 +1,17 @@
 import { StatusDto } from "../dto/StatusDto";
+import { DtoConvertible } from "./DtoConvertible";
 import { PostSegment, Type } from "./PostSegment";
 import { User } from "./User";
 import { format } from "date-fns";
 
-export class Status {
+export class Status extends DtoConvertible<StatusDto> {
   private _post: string;
   private _user: User;
   private _timestamp: number;
   private _segments: PostSegment[];
 
   public constructor(post: string, user: User, timestamp: number) {
+    super();
     this._post = post;
     this._user = user;
     this._timestamp = timestamp;

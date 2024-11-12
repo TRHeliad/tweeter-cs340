@@ -1,6 +1,7 @@
 import { UserDto } from "../dto/UserDto";
+import { DtoConvertible } from "./DtoConvertible";
 
-export class User {
+export class User extends DtoConvertible<UserDto> {
   private _firstName: string;
   private _lastName: string;
   private _alias: string;
@@ -12,6 +13,7 @@ export class User {
     alias: string,
     imageUrl: string
   ) {
+    super();
     this._firstName = firstName;
     this._lastName = lastName;
     this._alias = alias;
