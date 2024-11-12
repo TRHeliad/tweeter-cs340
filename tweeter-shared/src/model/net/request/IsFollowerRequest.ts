@@ -1,7 +1,6 @@
 import { UserDto } from "../../dto/UserDto";
-import { AuthenticatedRequest } from "./AuthenticatedRequest";
+import { UserRequest } from "./UserRequest";
 
-export interface IsFollowerRequest extends AuthenticatedRequest {
-  readonly user: UserDto;
+export interface IsFollowerRequest extends UserRequest {
   readonly selectedUser: UserDto;
 }

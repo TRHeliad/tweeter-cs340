@@ -1,6 +1,3 @@
-import { UserDto } from "../../dto/UserDto";
-import { AuthenticatedRequest } from "./AuthenticatedRequest";
+import { UserRequest } from "./UserRequest";
 
-export interface FollowUpdateRequest extends AuthenticatedRequest {
-  readonly user: UserDto;
-}
+export type FollowUpdateRequest = UserRequest;
