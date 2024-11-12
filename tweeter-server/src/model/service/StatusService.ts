@@ -33,7 +33,7 @@ export class StatusService {
     return [dtos, hasMore];
   }
 
-  public async postStatus(token: string, newStatus: Status): Promise<void> {
+  public async postStatus(token: string, newStatus: StatusDto): Promise<void> {
     // Pause so we can see the posting status message. Remove when connected to the server
     await new Promise((f) => setTimeout(f, 2000));
 

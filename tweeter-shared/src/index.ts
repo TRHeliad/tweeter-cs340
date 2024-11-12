@@ -15,8 +15,10 @@ export type { FollowUpdateRequest } from "./model/net/request/FollowUpdateReques
 export type { IsFollowerRequest } from "./model/net/request/IsFollowerRequest";
 export type { GetFollowCountRequest } from "./model/net/request/GetFollowCountRequest";
 export type { PagedItemRequest } from "./model/net/request/PagedItemRequest";
+export type { PostStatusRequest } from "./model/net/request/PostStatusRequest";
 
 // Responses
+export type { TweeterResponse } from "./model/net/response/TweeterResponse";
 export type { FollowUpdateResponse } from "./model/net/response/FollowUpdateResponse";
 export type { IsFollowerResponse } from "./model/net/response/IsFollowerResponse";
 export type { GetFollowCountResponse } from "./model/net/response/GetFollowCountResponse";
