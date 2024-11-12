@@ -11,6 +11,7 @@ export type { StatusDto } from "./model/dto/StatusDto";
 export type { PostSegmentDto } from "./model/dto/PostSegmentDto";
 
 // Requests
+export type { TweeterRequest } from "./model/net/request/TweeterRequest";
 export type { FollowUpdateRequest } from "./model/net/request/FollowUpdateRequest";
 export type { IsFollowerRequest } from "./model/net/request/IsFollowerRequest";
 export type { GetFollowCountRequest } from "./model/net/request/GetFollowCountRequest";
