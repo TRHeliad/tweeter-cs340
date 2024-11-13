@@ -21,13 +21,18 @@ import {
   UserDto,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
-import { DtoConvertible } from "tweeter-shared/dist/model/domain/DtoConvertible";
 
 export class ServerFacade {
   private SERVER_URL =
     "https://dn65c2keeh.execute-api.us-west-2.amazonaws.com/dev/";
 
-  private clientCommunicator = new ClientCommunicator(this.SERVER_URL);
+  private _clientCommunicator: ClientCommunicator | null = null;
+
+  public get clientCommunicator() {
+    if (this._clientCommunicator == null)
+      this._clientCommunicator = new ClientCommunicator(this.SERVER_URL);
+    return this._clientCommunicator;
+  }
 
   private handleResponseError<T extends TweeterResponse>(response: T): never {
     console.error(response);

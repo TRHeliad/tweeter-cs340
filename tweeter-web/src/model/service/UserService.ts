@@ -1,5 +1,6 @@
 import { AuthToken, User } from "tweeter-shared";
 import { TweeterWebService } from "./TweeterWebService";
+import { Buffer } from "buffer";
 
 export class UserService extends TweeterWebService {
   public async logout(authToken: AuthToken) {
@@ -25,12 +26,14 @@ export class UserService extends TweeterWebService {
     userImageBytes: Uint8Array,
     imageFileExtension: string
   ): Promise<[User, AuthToken]> {
+    const imageStringBase64: string =
+      Buffer.from(userImageBytes).toString("base64");
     return this.serverFacade.register({
       firstName: firstName,
       lastName: lastName,
       alias: alias,
       password: password,
-      userImageBytes: userImageBytes,
+      userImageBytes: imageStringBase64,
       imageFileExtension: imageFileExtension,
     });
   }
