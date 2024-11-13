@@ -19,6 +19,7 @@ export class UserService {
       throw new Error("Invalid alias or password");
     }
 
+	// Use time-to-live for dynamoDB to expire authtokens
     return [user.dto, FakeData.instance.authToken.dto];
   }
 

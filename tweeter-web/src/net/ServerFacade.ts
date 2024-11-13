@@ -21,6 +21,7 @@ import {
   UserDto,
 } from "tweeter-shared";
 import { ClientCommunicator } from "./ClientCommunicator";
+import { AuthenticatedRequest } from "tweeter-shared/dist/model/net/request/AuthenticatedRequest";
 
 export class ServerFacade {
   private SERVER_URL =
@@ -218,6 +219,17 @@ export class ServerFacade {
     if (response.success) {
       return this.handleTokenSuccessResponse(response, "Incorrect credentials");
     } else {
+      this.handleResponseError(response);
+    }
+  }
+
+  public async logout(request: AuthenticatedRequest): Promise<void> {
+    const response = await this.clientCommunicator.doPost<
+      AuthenticatedRequest,
+      TweeterResponse
+    >(request, "/user/logout");
+
+    if (!response.success) {
       this.handleResponseError(response);
     }
   }
