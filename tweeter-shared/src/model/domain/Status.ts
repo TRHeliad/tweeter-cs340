@@ -285,9 +285,6 @@ export class Status extends DtoConvertible<StatusDto> {
         User.fromDto(dto.user)!,
         dto.timestamp
       );
-      status.segments = dto.postSegments.map(
-        (dto) => PostSegment.fromDto(dto)!
-      );
       return status;
     }
 
@@ -299,7 +296,6 @@ export class Status extends DtoConvertible<StatusDto> {
       post: this.post,
       user: this.user.dto,
       timestamp: this.timestamp,
-      postSegments: this.segments.map((segment) => segment.dto),
     };
   }
 }
