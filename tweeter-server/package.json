@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/lib-dynamodb": "^3.699.0",
     "date-fns": "^3.3.1",
     "tweeter-shared": "file:../tweeter-shared",
     "uuid": "^9.0.1"
