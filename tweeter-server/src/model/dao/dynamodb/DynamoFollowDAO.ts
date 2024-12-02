@@ -1,13 +1,6 @@
-import {
-  DeleteCommand,
-  DynamoDBDocumentClient,
-  GetCommand,
-  PutCommand,
-  QueryCommand,
-  UpdateCommand,
-} from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 
-import { FollowAliasesDto, UserDto } from "tweeter-shared";
+import { FollowAliasesDto } from "tweeter-shared";
 import { FollowDto } from "tweeter-shared/dist/model/dto/FollowDto";
 import { FollowDAO } from "../FollowDAO";
 import { DataPage } from "../DataPage";
