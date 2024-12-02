@@ -11,6 +11,8 @@ export type { StatusDto } from "./model/dto/StatusDto";
 export type { FollowDto } from "./model/dto/FollowDto";
 export type { FollowAliasesDto } from "./model/dto/FollowAliasesDto";
 export type { StatusWithAliasDto } from "./model/dto/StatusWithAliasDto";
+export type { AuthTokenDto } from "./model/dto/AuthTokenDto";
+export type { SessionDto } from "./model/dto/SessionDto";
 
 // Requests
 export type { TweeterRequest } from "./model/net/request/TweeterRequest";

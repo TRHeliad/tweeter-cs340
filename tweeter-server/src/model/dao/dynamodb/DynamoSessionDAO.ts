@@ -5,26 +5,31 @@ import {
 } from "@aws-sdk/lib-dynamodb";
 
 import { AuthTokenDto } from "tweeter-shared/dist/model/dto/AuthTokenDto";
-import { AuthTokenDAO } from "../AuthTokenDAO";
+import { SessionDAO } from "../SessionDAO";
 import { DynamoDAO } from "./DynamoDAO";
+import { SessionDto } from "tweeter-shared";
 
-export class DynamoAuthTokenDAO extends DynamoDAO implements AuthTokenDAO {
+export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
   readonly tableName = "AuthToken";
   readonly tokenAttribute = "token";
   readonly timestampAttribute = "timestamp";
+  readonly aliasAttribute = "alias";
 
-  async putToken(authToken: AuthTokenDto): Promise<void> {
+  async putSession(session: SessionDto): Promise<void> {
+    const authToken = session.authToken;
     const params = {
       TableName: this.tableName,
       Item: {
         [this.tokenAttribute]: authToken.token,
         [this.timestampAttribute]: authToken.timestamp,
+        [this.aliasAttribute]: session.userAlias,
       },
     };
     await this.client.send(new PutCommand(params));
   }
 
-  async deleteToken(authToken: AuthTokenDto): Promise<void> {
+  async deleteSession(session: SessionDto): Promise<void> {
+    const authToken = session.authToken;
     const params = {
       TableName: this.tableName,
       Key: this.generateAuthTokenKey(authToken),
@@ -32,7 +37,8 @@ export class DynamoAuthTokenDAO extends DynamoDAO implements AuthTokenDAO {
     await this.client.send(new DeleteCommand(params));
   }
 
-  async updateToken(authToken: AuthTokenDto): Promise<void> {
+  async updateSession(session: SessionDto): Promise<void> {
+    const authToken = session.authToken;
     const params = {
       TableName: this.tableName,
       Key: this.generateAuthTokenKey(authToken),

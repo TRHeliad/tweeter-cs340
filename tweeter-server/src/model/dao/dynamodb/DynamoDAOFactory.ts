@@ -1,9 +1,9 @@
-import { AuthTokenDAO } from "../AuthTokenDAO";
+import { SessionDAO } from "../SessionDAO";
 import { FollowDAO } from "../FollowDAO";
 import { StatusDAO } from "../StatusDAO";
 import { TweeterDAOFactory } from "../TweeterDAOFactory";
 import { UserDAO } from "../UserDAO";
-import { DynamoAuthTokenDAO } from "./DynamoAuthTokenDAO";
+import { DynamoSessionDAO } from "./DynamoSessionDAO";
 import { DynamoFollowDAO } from "./DynamoFollowDAO";
 import { DynamoStatusDAO } from "./DynamoStatusDAO";
 import { DynamoUserDAO } from "./DynamoUserDAO";
@@ -17,8 +17,8 @@ export class DynamoDAOFactory implements TweeterDAOFactory {
     return new DynamoUserDAO();
   }
 
-  getAuthTokenDAO(): AuthTokenDAO {
-    return new DynamoAuthTokenDAO();
+  getSessionDAO(): SessionDAO {
+    return new DynamoSessionDAO();
   }
 
   getStatusDAO(): StatusDAO {
