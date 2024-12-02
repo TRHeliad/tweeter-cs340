@@ -1,4 +1,4 @@
-import { PagedItemRequest, PagedItemResponse, StatusDto } from "tweeter-shared";
+import { PagedItemRequest, PagedItemResponse } from "tweeter-shared";
 
 export const PagedItemLambda = async <T>(
   request: PagedItemRequest<T>,
