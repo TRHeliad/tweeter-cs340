@@ -10,6 +10,7 @@ export type { UserDto } from "./model/dto/UserDto";
 export type { StatusDto } from "./model/dto/StatusDto";
 export type { FollowDto } from "./model/dto/FollowDto";
 export type { FollowAliasesDto } from "./model/dto/FollowAliasesDto";
+export type { StatusWithAliasDto } from "./model/dto/StatusWithAliasDto";
 
 // Requests
 export type { TweeterRequest } from "./model/net/request/TweeterRequest";
