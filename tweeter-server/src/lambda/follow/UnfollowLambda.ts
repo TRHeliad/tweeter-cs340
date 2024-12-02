@@ -1,11 +1,11 @@
 import { FollowUpdateRequest, FollowUpdateResponse } from "tweeter-shared";
-import { FollowService } from "../../model/service/FollowService";
 import { FollowUpdateLambda } from "./FollowUpdateLambda";
+import { createFollowService } from "./CreateFollowService";
 
 export const handler = async (
   request: FollowUpdateRequest
 ): Promise<FollowUpdateResponse> => {
-  const followService = new FollowService();
+  const followService = createFollowService();
   return FollowUpdateLambda(
     request,
     followService.unfollow.bind(followService)

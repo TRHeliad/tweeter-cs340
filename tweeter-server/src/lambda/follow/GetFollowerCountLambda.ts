@@ -1,11 +1,11 @@
 import { GetFollowCountRequest, GetFollowCountResponse } from "tweeter-shared";
-import { FollowService } from "../../model/service/FollowService";
 import { GetFollowCountLambda } from "./GetFollowCountLambda";
+import { createFollowService } from "./CreateFollowService";
 
 export const handler = async (
   request: GetFollowCountRequest
 ): Promise<GetFollowCountResponse> => {
-  const followService = new FollowService();
+  const followService = createFollowService();
   return GetFollowCountLambda(
     request,
     followService.getFollowerCount.bind(followService)
