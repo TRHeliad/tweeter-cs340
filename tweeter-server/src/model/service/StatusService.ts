@@ -1,6 +1,14 @@
 import { AuthToken, FakeData, Status, StatusDto } from "tweeter-shared";
+import { StatusDAO } from "../dao/StatusDAO";
+import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 
 export class StatusService {
+  private readonly statusDao: StatusDAO;
+
+  constructor(daoFactory: TweeterDAOFactory) {
+    this.statusDao = daoFactory.getStatusDAO();
+  }
+
   public async loadMoreStoryItems(
     token: string,
     userAlias: string,

@@ -1,8 +1,16 @@
 import { Buffer } from "buffer";
 import { AuthToken, FakeData, User, UserDto } from "tweeter-shared";
 import { AuthTokenDto } from "tweeter-shared/dist/model/dto/AuthTokenDto";
+import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
+import { UserDAO } from "../dao/UserDAO";
 
 export class UserService {
+  private readonly userDao: UserDAO;
+
+  constructor(daoFactory: TweeterDAOFactory) {
+    this.userDao = daoFactory.getUserDAO();
+  }
+
   public async logout(token: string) {
     // Pause so we can see the logging out message. Delete when the call to the server is implemented.
     await new Promise((res) => setTimeout(res, 1000));
