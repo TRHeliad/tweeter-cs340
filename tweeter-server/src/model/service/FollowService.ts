@@ -19,7 +19,7 @@ export class FollowService {
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: UserDto | null
+    lastItem: UserDto | undefined
   ): Promise<[UserDto[], boolean]> {
     this.sessionService.throwOnInvalidAuthToken(token);
 
@@ -40,7 +40,7 @@ export class FollowService {
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: UserDto | null
+    lastItem: UserDto | undefined
   ): Promise<[UserDto[], boolean]> {
     this.sessionService.throwOnInvalidAuthToken(token);
 

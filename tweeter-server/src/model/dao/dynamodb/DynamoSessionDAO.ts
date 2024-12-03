@@ -13,8 +13,10 @@ import { SessionDto } from "tweeter-shared";
 export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
   readonly tableName = "AuthToken";
   readonly tokenAttribute = "token";
-  readonly timestampAttribute = "timestamp";
+  readonly timestampAttribute = "verifyTimestamp";
+  readonly expirationAttribute = "expiration";
   readonly aliasAttribute = "alias";
+  readonly tokenLifetime = 3600;
 
   async putSession(session: SessionDto): Promise<void> {
     const authToken = session.authToken;
@@ -24,6 +26,9 @@ export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
         [this.tokenAttribute]: authToken.token,
         [this.timestampAttribute]: authToken.timestamp,
         [this.aliasAttribute]: session.userAlias,
+        [this.expirationAttribute]: this.getExpirationTimestamp(
+          authToken.timestamp
+        ),
       },
     };
     await this.client.send(new PutCommand(params));
@@ -60,9 +65,15 @@ export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
       TableName: this.tableName,
       Key: this.generateAuthTokenKey(authToken),
       ExpressionAttributeValues: {
-        ":timestamp": authToken.timestamp,
+        ":ts": authToken.timestamp,
+        ":ex": this.getExpirationTimestamp(authToken.timestamp),
       },
-      UpdateExpression: "SET " + this.timestampAttribute + " = :timestamp",
+      UpdateExpression:
+        "SET " +
+        this.timestampAttribute +
+        " = :ts, " +
+        this.expirationAttribute +
+        " = :ex",
     };
     await this.client.send(new UpdateCommand(params));
   }
@@ -71,5 +82,9 @@ export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
     return {
       [this.tokenAttribute]: authToken.token,
     };
+  }
+
+  private getExpirationTimestamp(timestamp: number) {
+    return Math.floor(timestamp / 1000) + 3600;
   }
 }

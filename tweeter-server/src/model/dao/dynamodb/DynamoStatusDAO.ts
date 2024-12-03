@@ -7,12 +7,12 @@ import { DynamoDAO } from "./DynamoDAO";
 
 export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   readonly storyTableName = "Story";
-  readonly senderAliasAttribute = "sender-alias";
-  readonly timestampAttribute = "timestamp";
+  readonly senderAliasAttribute = "senderAlias";
+  readonly timestampAttribute = "creationTimestamp";
 
   readonly feedTableName = "Feed";
-  readonly receiverAliasAttribute = "receiver-alias";
-  readonly feedDateAliasAttribute = "date-and-alias";
+  readonly receiverAliasAttribute = "receiverAlias";
+  readonly feedDateAliasAttribute = "dateAndAlias";
 
   readonly postAttribute = "post";
 

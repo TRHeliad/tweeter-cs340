@@ -13,7 +13,7 @@ export const PagedItemLambda = async <T>(
     request.token,
     request.userAlias,
     request.pageSize,
-    request.lastItem
+    request.lastItem ?? undefined
   );
   return {
     success: true,

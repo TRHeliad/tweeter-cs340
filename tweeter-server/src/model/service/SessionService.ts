@@ -15,9 +15,18 @@ export class SessionService {
   async isValidAuthToken(
     token: string
   ): Promise<[boolean, SessionDto | undefined]> {
-    const sessionDto = await this.sessionDao.getSession(token);
+    let sessionDto = await this.sessionDao.getSession(token);
     const now = Date.now();
     if (sessionDto !== undefined && sessionDto.authToken.timestamp < now) {
+      // Refresh token
+      sessionDto = {
+        userAlias: sessionDto.userAlias,
+        authToken: {
+          token: sessionDto.authToken.token,
+          timestamp: now,
+        },
+      };
+      this.sessionDao.updateSession(sessionDto);
       return [true, sessionDto];
     }
     return [false, sessionDto];

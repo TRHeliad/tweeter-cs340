@@ -12,9 +12,9 @@ import { DynamoDAO } from "./DynamoDAO";
 
 export class DynamoFollowDAO extends DynamoDAO implements FollowDAO {
   readonly tableName = "Follow";
-  readonly indexName = "Follow_index";
-  readonly followerAliasAttribute = "follower-alias";
-  readonly followeeAliasAttribute = "followee-alias";
+  readonly indexName = "FollowIndex";
+  readonly followerAliasAttribute = "followerAlias";
+  readonly followeeAliasAttribute = "followeeAlias";
 
   async putFollow(follow: FollowAliasesDto): Promise<void> {
     const params = {
