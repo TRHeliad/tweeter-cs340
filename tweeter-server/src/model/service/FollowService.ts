@@ -1,20 +1,17 @@
-import { AuthToken, FakeData, SessionDto, User, UserDto } from "tweeter-shared";
+import { FakeData, SessionDto, User, UserDto } from "tweeter-shared";
 import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { FollowDAO } from "../dao/FollowDAO";
 import { UserDAO } from "../dao/UserDAO";
-import { SessionDAO } from "../dao/SessionDAO";
 import { SessionService } from "./SessionService";
 
 export class FollowService {
   private readonly followDao: FollowDAO;
   private readonly userDao: UserDAO;
-  private readonly sessionDao: SessionDAO;
   private readonly sessionService: SessionService;
 
   constructor(daoFactory: TweeterDAOFactory) {
     this.followDao = daoFactory.getFollowDAO();
     this.userDao = daoFactory.getUserDAO();
-    this.sessionDao = daoFactory.getSessionDAO();
     this.sessionService = new SessionService(daoFactory);
   }
 

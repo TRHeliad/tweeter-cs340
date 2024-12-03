@@ -6,7 +6,7 @@ export const PagedItemLambda = async <T>(
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: T | null
+    lastItem: T | undefined
   ) => Promise<[T[], boolean]>
 ): Promise<PagedItemResponse<T>> => {
   const [items, hasMore] = await loadMethod(

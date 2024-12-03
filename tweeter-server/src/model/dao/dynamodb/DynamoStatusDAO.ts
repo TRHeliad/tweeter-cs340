@@ -92,7 +92,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
 
   async getPageOfFeed(
     alias: string,
-    lastLocation: string | undefined,
+    lastLocation: StatusDto | undefined,
     limit: number
   ): Promise<DataPage<StatusWithAliasDto>> {
     return this.getPageOfStatuses(
@@ -100,7 +100,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       this.receiverAliasAttribute,
       this.feedDateAliasAttribute,
       this.feedTableName,
-      lastLocation,
+      this.generateFeedSortKey(lastLocation),
       limit
     );
   }
@@ -142,7 +142,10 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
     return new DataPage<StatusWithAliasDto>(items, hasMorePages);
   }
 
-  private generateFeedSortKey(status: StatusDto): string {
+  private generateFeedSortKey(
+    status: StatusDto | undefined
+  ): string | undefined {
+    if (status === undefined) return undefined;
     const date = new Date(status.timestamp);
     return date.toISOString() + status.user.alias;
   }

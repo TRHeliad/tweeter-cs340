@@ -7,7 +7,7 @@ export const UserItemLambda = async (
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: StatusDto | null
+    lastItem: StatusDto | undefined
   ) => Promise<[StatusDto[], boolean]>
 ): Promise<PagedItemResponse<StatusDto>> => {
   return PagedItemLambda(request, loadMethod);

@@ -1,4 +1,4 @@
-import { SessionDto } from "tweeter-shared";
+import { AuthToken, SessionDto, UserDto } from "tweeter-shared";
 import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { SessionDAO } from "../dao/SessionDAO";
 
@@ -25,5 +25,17 @@ export class SessionService {
 
   async throwOnInvalidAuthToken(token: string): Promise<void> {
     if (!this.isValidAuthToken(token)) throw this.unauthenticatedError;
+  }
+
+  async createNewSession(userDto: UserDto): Promise<SessionDto> {
+    const authToken = AuthToken.Generate();
+    const sessionDto = {
+      userAlias: userDto.alias,
+      authToken: authToken.dto,
+    };
+
+    this.sessionDao.putSession(sessionDto);
+
+    return sessionDto;
   }
 }

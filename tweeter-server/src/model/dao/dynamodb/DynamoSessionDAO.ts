@@ -46,11 +46,10 @@ export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
         };
   }
 
-  async deleteSession(session: SessionDto): Promise<void> {
-    const authToken = session.authToken;
+  async deleteSession(token: string): Promise<void> {
     const params = {
       TableName: this.tableName,
-      Key: this.generateAuthTokenKey(authToken),
+      Key: this.generateAuthTokenKey({ token: token, timestamp: 0 }),
     };
     await this.client.send(new DeleteCommand(params));
   }
