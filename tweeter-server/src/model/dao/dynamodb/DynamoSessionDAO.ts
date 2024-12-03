@@ -1,5 +1,6 @@
 import {
   DeleteCommand,
+  GetCommand,
   PutCommand,
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
@@ -26,6 +27,23 @@ export class DynamoSessionDAO extends DynamoDAO implements SessionDAO {
       },
     };
     await this.client.send(new PutCommand(params));
+  }
+
+  async getSession(token: string): Promise<SessionDto | undefined> {
+    const params = {
+      TableName: this.tableName,
+      Key: { [this.tokenAttribute]: token },
+    };
+    const output = await this.client.send(new GetCommand(params));
+    return output.Item == undefined
+      ? undefined
+      : {
+          userAlias: output.Item[this.aliasAttribute],
+          authToken: {
+            token: output.Item[this.tokenAttribute],
+            timestamp: output.Item[this.timestampAttribute],
+          },
+        };
   }
 
   async deleteSession(session: SessionDto): Promise<void> {
