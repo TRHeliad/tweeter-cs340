@@ -1,7 +1,11 @@
-import { DeleteCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  DeleteCommand,
+  GetCommand,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 
 import { FollowAliasesDto } from "tweeter-shared";
-import { FollowDto } from "tweeter-shared/dist/model/dto/FollowDto";
 import { FollowDAO } from "../FollowDAO";
 import { DataPage } from "../DataPage";
 import { DynamoDAO } from "./DynamoDAO";
@@ -12,23 +16,35 @@ export class DynamoFollowDAO extends DynamoDAO implements FollowDAO {
   readonly followerAliasAttribute = "follower-alias";
   readonly followeeAliasAttribute = "followee-alias";
 
-  async putFollow(follow: FollowDto): Promise<void> {
+  async putFollow(follow: FollowAliasesDto): Promise<void> {
     const params = {
       TableName: this.tableName,
       Item: {
-        [this.followerAliasAttribute]: follow.follower.alias,
-        [this.followeeAliasAttribute]: follow.followee.alias,
+        [this.followerAliasAttribute]: follow.followerAlias,
+        [this.followeeAliasAttribute]: follow.followeeAlias,
       },
     };
     await this.client.send(new PutCommand(params));
   }
 
-  async deleteFollow(follow: FollowDto): Promise<void> {
+  async deleteFollow(follow: FollowAliasesDto): Promise<void> {
     const params = {
       TableName: this.tableName,
       Key: this.generateFollowKey(follow),
     };
     await this.client.send(new DeleteCommand(params));
+  }
+
+  async getIsFollower(follow: FollowAliasesDto): Promise<boolean> {
+    const params = {
+      TableName: this.tableName,
+      Key: {
+        [this.followerAliasAttribute]: follow.followerAlias,
+        [this.followeeAliasAttribute]: follow.followeeAlias,
+      },
+    };
+    const output = await this.client.send(new GetCommand(params));
+    return output.Item !== undefined;
   }
 
   async getPageOfFollowees(
@@ -101,10 +117,10 @@ export class DynamoFollowDAO extends DynamoDAO implements FollowDAO {
     return new DataPage<FollowAliasesDto>(items, hasMorePages);
   }
 
-  private generateFollowKey(follow: FollowDto) {
+  private generateFollowKey(follow: FollowAliasesDto) {
     return {
-      [this.followerAliasAttribute]: follow.follower.alias,
-      [this.followeeAliasAttribute]: follow.followee.alias,
+      [this.followerAliasAttribute]: follow.followerAlias,
+      [this.followeeAliasAttribute]: follow.followeeAlias,
     };
   }
 }

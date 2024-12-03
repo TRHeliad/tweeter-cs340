@@ -3,8 +3,9 @@ import { DataPage } from "./DataPage";
 import { FollowAliasesDto } from "tweeter-shared";
 
 export interface FollowDAO {
-  putFollow: (follow: FollowDto) => Promise<void>;
-  deleteFollow: (follow: FollowDto) => Promise<void>;
+  putFollow: (follow: FollowAliasesDto) => Promise<void>;
+  deleteFollow: (follow: FollowAliasesDto) => Promise<void>;
+  getIsFollower: (follow: FollowAliasesDto) => Promise<boolean>;
 
   getPageOfFollowees: (
     alias: string,
