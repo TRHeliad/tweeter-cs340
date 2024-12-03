@@ -6,25 +6,27 @@ import {
   UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 
-import { UserDto } from "tweeter-shared";
+import { FullUserDto, UserDto } from "tweeter-shared";
 import { UserDAO } from "../UserDAO";
 import { DynamoDAO } from "./DynamoDAO";
 
 export class DynamoUserDAO extends DynamoDAO implements UserDAO {
   readonly tableName = "User";
   readonly aliasAttribute = "alias";
+  readonly passwordHashAttribute = "passwordHash";
   readonly firstNameAttribute = "firstName";
   readonly lastNameAttribute = "lastName";
   readonly imageUrlAttribute = "imageUrl";
 
-  async putUser(user: UserDto): Promise<void> {
+  async putUser(registration: FullUserDto): Promise<void> {
     const params = {
       TableName: this.tableName,
       Item: {
-        [this.aliasAttribute]: user.alias,
-        [this.firstNameAttribute]: user.firstName,
-        [this.lastNameAttribute]: user.lastName,
-        [this.imageUrlAttribute]: user.imageUrl,
+        [this.aliasAttribute]: registration.alias,
+        [this.passwordHashAttribute]: registration.passwordHash,
+        [this.firstNameAttribute]: registration.firstName,
+        [this.lastNameAttribute]: registration.lastName,
+        [this.imageUrlAttribute]: registration.imageUrl,
       },
     };
     await this.client.send(new PutCommand(params));
@@ -39,6 +41,18 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
   }
 
   async getUser(alias: string): Promise<UserDto | undefined> {
+    const fullUserDto = await this.getFullUser(alias);
+    return fullUserDto == undefined
+      ? undefined
+      : {
+          alias: fullUserDto.alias,
+          firstName: fullUserDto.firstName,
+          lastName: fullUserDto.lastName,
+          imageUrl: fullUserDto.imageUrl,
+        };
+  }
+
+  async getFullUser(alias: string): Promise<FullUserDto | undefined> {
     const params = {
       TableName: this.tableName,
       Key: { [this.aliasAttribute]: alias },
@@ -46,7 +60,13 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
     const output = await this.client.send(new GetCommand(params));
     return output.Item == undefined
       ? undefined
-      : this.userDtoFromItem(output.Item);
+      : {
+          alias: output.Item[this.aliasAttribute],
+          passwordHash: output.Item[this.passwordHashAttribute],
+          firstName: output.Item[this.firstNameAttribute],
+          lastName: output.Item[this.lastNameAttribute],
+          imageUrl: output.Item[this.imageUrlAttribute],
+        };
   }
 
   async updateUser(user: UserDto): Promise<void> {

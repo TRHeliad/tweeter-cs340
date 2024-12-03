@@ -7,6 +7,7 @@ export { AuthToken } from "./model/domain/AuthToken";
 
 // DTOs
 export type { UserDto } from "./model/dto/UserDto";
+export type { FullUserDto } from "./model/dto/FullUserDto";
 export type { StatusDto } from "./model/dto/StatusDto";
 export type { FollowDto } from "./model/dto/FollowDto";
 export type { FollowAliasesDto } from "./model/dto/FollowAliasesDto";
