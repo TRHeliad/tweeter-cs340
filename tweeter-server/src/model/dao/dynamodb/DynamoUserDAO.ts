@@ -134,6 +134,8 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
           },
         },
       };
+      console.log(aliases);
+      console.log(params, keys);
 
       const result = await this.client.send(new BatchGetCommand(params));
 

@@ -176,7 +176,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   private createPutFeedRequest(status: StatusDto, followerAlias: string) {
     const item = {
       [this.receiverAliasAttribute]: followerAlias,
-      [this.senderAliasAttribute]: status.user,
+      [this.senderAliasAttribute]: status.user.alias,
       [this.timestampAttribute]: status.timestamp,
       [this.feedDateAliasAttribute]: this.generateFeedSortKey(status),
       [this.postAttribute]: status.post,
