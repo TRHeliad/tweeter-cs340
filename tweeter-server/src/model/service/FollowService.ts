@@ -1,4 +1,10 @@
-import { FakeData, SessionDto, User, UserDto } from "tweeter-shared";
+import {
+  FakeData,
+  FollowAliasesDto,
+  SessionDto,
+  User,
+  UserDto,
+} from "tweeter-shared";
 import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { FollowDAO } from "../dao/FollowDAO";
 import { UserDAO } from "../dao/UserDAO";
@@ -71,22 +77,12 @@ export class FollowService {
       );
       if (!alreadyFollowing) {
         this.followDao.putFollow(followAliasesDto);
-        const followerFullUser = await this.userDao.getFullUser(
-          followAliasesDto.followerAlias
-        );
-        const followeeFullUser = await this.userDao.getFullUser(
-          followAliasesDto.followeeAlias
-        );
-        this.userDao.updateFollowCount(
-          followAliasesDto.followerAlias,
-          followerFullUser!.followerCount,
-          followerFullUser!.followeeCount + 1
-        );
-        this.userDao.updateFollowCount(
-          followAliasesDto.followeeAlias,
-          followeeFullUser!.followerCount + 1,
-          followeeFullUser!.followeeCount
-        );
+        return this.updateFollowCounts(followAliasesDto, true);
+      } else {
+        return Promise.all([
+          this.getFollowerCount(token, followAliasesDto.followeeAlias, true),
+          this.getFolloweeCount(token, followAliasesDto.followeeAlias, true),
+        ]);
       }
     };
     return this.updateFollowStatus(token, userToFollow, doUpdate);
@@ -97,11 +93,6 @@ export class FollowService {
     userToUnfollow: UserDto
   ): Promise<[followerCount: number, followeeCount: number]> {
     const doUpdate = async (sessionDto: SessionDto) => {
-      this.followDao.deleteFollow({
-        followerAlias: sessionDto!.userAlias,
-        followeeAlias: userToUnfollow.alias,
-      });
-
       const followAliasesDto = {
         followerAlias: sessionDto!.userAlias,
         followeeAlias: userToUnfollow.alias,
@@ -111,46 +102,56 @@ export class FollowService {
       );
       if (alreadyFollowing) {
         this.followDao.deleteFollow(followAliasesDto);
-        const followerFullUser = await this.userDao.getFullUser(
-          followAliasesDto.followerAlias
-        );
-        const followeeFullUser = await this.userDao.getFullUser(
-          followAliasesDto.followeeAlias
-        );
-        this.userDao.updateFollowCount(
-          followAliasesDto.followerAlias,
-          followerFullUser!.followerCount,
-          followerFullUser!.followeeCount - 1
-        );
-        this.userDao.updateFollowCount(
-          followAliasesDto.followeeAlias,
-          followeeFullUser!.followerCount - 1,
-          followeeFullUser!.followeeCount
-        );
+        return this.updateFollowCounts(followAliasesDto, false);
+      } else {
+        return Promise.all([
+          this.getFollowerCount(token, followAliasesDto.followeeAlias, true),
+          this.getFolloweeCount(token, followAliasesDto.followeeAlias, true),
+        ]);
       }
     };
     return this.updateFollowStatus(token, userToUnfollow, doUpdate);
   }
 
+  private async updateFollowCounts(
+    followAliasesDto: FollowAliasesDto,
+    isDoingFollow: boolean
+  ): Promise<[number, number]> {
+    const increment = isDoingFollow ? 1 : -1;
+    const followerFullUser = await this.userDao.getFullUser(
+      followAliasesDto.followerAlias
+    );
+    const followeeFullUser = await this.userDao.getFullUser(
+      followAliasesDto.followeeAlias
+    );
+    const newFolloweeFollowerCount =
+      followeeFullUser!.followerCount + increment;
+    const followeeFolloweeCount = followeeFullUser!.followeeCount;
+
+    this.userDao.updateFollowCount(
+      followAliasesDto.followerAlias,
+      followerFullUser!.followerCount,
+      followerFullUser!.followeeCount + increment
+    );
+    this.userDao.updateFollowCount(
+      followAliasesDto.followeeAlias,
+      newFolloweeFollowerCount,
+      followeeFolloweeCount
+    );
+
+    return [newFolloweeFollowerCount, followeeFolloweeCount];
+  }
+
   private async updateFollowStatus(
     token: string,
     userToChange: UserDto,
-    doUpdate: (sessionDto: SessionDto) => Promise<void>
+    doUpdate: (sessionDto: SessionDto) => Promise<[number, number]>
   ): Promise<[followerCount: number, followeeCount: number]> {
     const [isValidToken, sessionDto] =
       await this.sessionService.isValidAuthToken(token);
     if (!isValidToken) throw this.sessionService.unauthenticatedError;
 
-    // Pause so we can see the follow message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    await doUpdate(sessionDto!);
-
-    const user = User.fromDto(userToChange)!;
-    const followerCount = await this.getFollowerCount(token, user);
-    const followeeCount = await this.getFolloweeCount(token, user);
-
-    return [followerCount, followeeCount];
+    return doUpdate(sessionDto!);
   }
 
   public async getIsFollowerStatus(
@@ -165,16 +166,26 @@ export class FollowService {
     });
   }
 
-  public async getFolloweeCount(token: string, user: UserDto): Promise<number> {
-    await this.sessionService.throwOnInvalidAuthToken(token);
-    const fullUser = await this.userDao.getFullUser(user.alias);
+  public async getFolloweeCount(
+    token: string,
+    alias: string,
+    alreadyVerified: boolean = false
+  ): Promise<number> {
+    if (!alreadyVerified)
+      await this.sessionService.throwOnInvalidAuthToken(token);
+    const fullUser = await this.userDao.getFullUser(alias);
     if (fullUser == undefined) throw Error("[Bad Request]: Invalid user");
     return fullUser.followeeCount;
   }
 
-  public async getFollowerCount(token: string, user: UserDto): Promise<number> {
-    await this.sessionService.throwOnInvalidAuthToken(token);
-    const fullUser = await this.userDao.getFullUser(user.alias);
+  public async getFollowerCount(
+    token: string,
+    alias: string,
+    alreadyVerified: boolean = false
+  ): Promise<number> {
+    if (!alreadyVerified)
+      await this.sessionService.throwOnInvalidAuthToken(token);
+    const fullUser = await this.userDao.getFullUser(alias);
     if (fullUser == undefined) throw Error("[Bad Request]: Invalid user");
     return fullUser.followerCount;
   }

@@ -1,10 +1,13 @@
-import { handler } from "./lambda/status/GetStoriesLambda";
+import { handler } from "./lambda/follow/UnfollowLambda";
 
 handler({
-  token: "ff9c00f1-657b-427c-80b2-f15d3559f36b",
-  userAlias: "ben",
-  pageSize: 10,
-  lastItem: undefined,
+  token: "0732f980-21a5-4db1-9443-81daabcf5da5",
+  user: {
+    alias: "@ben",
+    firstName: "",
+    lastName: "",
+    imageUrl: "",
+  },
 }).then((response) => {
   console.log(response);
 });

@@ -100,7 +100,7 @@ export class ServerFacade {
     >(request, "/follow/follow");
 
     if (response.success) {
-      return [response.followerCount, response.followerCount];
+      return [response.followerCount, response.followeeCount];
     } else {
       this.handleResponseError(response);
     }
@@ -112,10 +112,10 @@ export class ServerFacade {
     const response = await this.clientCommunicator.doPost<
       FollowUpdateRequest,
       FollowUpdateResponse
-    >(request, "/follow/follow");
+    >(request, "/follow/unfollow");
 
     if (response.success) {
-      return [response.followerCount, response.followerCount];
+      return [response.followerCount, response.followeeCount];
     } else {
       this.handleResponseError(response);
     }

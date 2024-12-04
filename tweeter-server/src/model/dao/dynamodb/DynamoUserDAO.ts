@@ -138,7 +138,6 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
       const result = await this.client.send(new BatchGetCommand(params));
 
       if (result.Responses) {
-        console.log(result.Responses);
         return result.Responses[this.tableName].map<UserDto>((item) =>
           this.userDtoFromItem(item)
         );

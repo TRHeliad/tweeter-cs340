@@ -1,14 +1,10 @@
-import {
-  GetFollowCountRequest,
-  GetFollowCountResponse,
-  UserDto,
-} from "tweeter-shared";
+import { GetFollowCountRequest, GetFollowCountResponse } from "tweeter-shared";
 
 export const GetFollowCountLambda = async (
   request: GetFollowCountRequest,
-  getMethod: (token: string, user: UserDto) => Promise<number>
+  getMethod: (token: string, alias: string) => Promise<number>
 ): Promise<GetFollowCountResponse> => {
-  const count = await getMethod(request.token, request.user);
+  const count = await getMethod(request.token, request.alias);
   return {
     success: true,
     message: null,

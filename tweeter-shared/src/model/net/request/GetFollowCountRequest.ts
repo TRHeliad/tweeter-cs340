@@ -1,3 +1,5 @@
-import { UserRequest } from "./UserRequest";
+import { AuthenticatedRequest } from "./AuthenticatedRequest";
 
-export type GetFollowCountRequest = UserRequest;
+export interface GetFollowCountRequest extends AuthenticatedRequest {
+  readonly alias: string;
+}

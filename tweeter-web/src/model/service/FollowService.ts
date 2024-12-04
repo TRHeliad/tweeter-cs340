@@ -44,7 +44,7 @@ export class FollowService extends TweeterWebService {
     authToken: AuthToken,
     userToUnfollow: User
   ): Promise<[followerCount: number, followeeCount: number]> {
-    return this.serverFacade.follow({
+    return this.serverFacade.unfollow({
       token: authToken.token,
       user: userToUnfollow.dto,
     });
@@ -68,7 +68,7 @@ export class FollowService extends TweeterWebService {
   ): Promise<number> {
     return this.serverFacade.getFolloweeCount({
       token: authToken.token,
-      user: user.dto,
+      alias: user.alias,
     });
   }
 
@@ -78,7 +78,7 @@ export class FollowService extends TweeterWebService {
   ): Promise<number> {
     return this.serverFacade.getFollowerCount({
       token: authToken.token,
-      user: user.dto,
+      alias: user.alias,
     });
   }
 }

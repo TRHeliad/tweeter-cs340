@@ -1,6 +1,9 @@
 import useToastListener from "../toaster/ToastListenerHook";
 import useUserInfo from "../userInfo/UserInfoHook";
-import { UserNavigationPresenter, UserNavigationView } from "../../presenters/UserNavigationPresenter";
+import {
+  UserNavigationPresenter,
+  UserNavigationView,
+} from "../../presenters/UserNavigationPresenter";
 import { useState } from "react";
 
 interface UserNavigation {
@@ -27,7 +30,6 @@ const useUserNavigation = (): UserNavigation => {
     navigateToUser: async (event: React.MouseEvent): Promise<void> => {
       event.preventDefault();
       const alias = extractAlias(event.target.toString());
-      
       presenter.navigateToUser(alias, currentUser!, authToken!);
     },
   };
