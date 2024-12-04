@@ -56,7 +56,10 @@ export abstract class PagedItemPresenter<
         );
 
         this.hasMoreItems = hasMore;
-        this.lastItem = newItems[newItems.length - 1];
+
+        if (newItems.length > 0) {
+          this.lastItem = newItems[newItems.length - 1];
+        }
         this.view.addItems(newItems);
       }
     }, this.getItemDescription());

@@ -9,15 +9,18 @@ import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { FollowDAO } from "../dao/FollowDAO";
 import { UserDAO } from "../dao/UserDAO";
 import { SessionService } from "./SessionService";
+import { StatusDAO } from "../dao/StatusDAO";
 
 export class FollowService {
   private readonly followDao: FollowDAO;
   private readonly userDao: UserDAO;
+  private readonly statusDao: StatusDAO;
   private readonly sessionService: SessionService;
 
   constructor(daoFactory: TweeterDAOFactory) {
     this.followDao = daoFactory.getFollowDAO();
     this.userDao = daoFactory.getUserDAO();
+    this.statusDao = daoFactory.getStatusDAO();
     this.sessionService = new SessionService(daoFactory);
   }
 
@@ -77,6 +80,11 @@ export class FollowService {
       );
       if (!alreadyFollowing) {
         this.followDao.putFollow(followAliasesDto);
+        // Update feed
+        this.statusDao.addStoryToFeed(
+          followAliasesDto.followerAlias,
+          followAliasesDto.followeeAlias
+        );
         return this.updateFollowCounts(followAliasesDto, true);
       } else {
         return Promise.all([
@@ -102,6 +110,11 @@ export class FollowService {
       );
       if (alreadyFollowing) {
         this.followDao.deleteFollow(followAliasesDto);
+        // Update feed
+        this.statusDao.removeStoryFromFeed(
+          followAliasesDto.followerAlias,
+          followAliasesDto.followeeAlias
+        );
         return this.updateFollowCounts(followAliasesDto, false);
       } else {
         return Promise.all([

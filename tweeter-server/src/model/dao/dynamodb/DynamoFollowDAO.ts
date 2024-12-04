@@ -114,6 +114,7 @@ export class DynamoFollowDAO extends DynamoDAO implements FollowDAO {
         followeeAlias: item[this.followeeAliasAttribute],
       })
     );
+
     return new DataPage<FollowAliasesDto>(items, hasMorePages);
   }
 

@@ -10,6 +10,8 @@ import { FullUserDto, UserDto } from "tweeter-shared";
 import { UserDAO } from "../UserDAO";
 import { DynamoDAO } from "./DynamoDAO";
 
+type PrimaryKey = { [key: string]: string };
+
 export class DynamoUserDAO extends DynamoDAO implements UserDAO {
   readonly tableName = "User";
   readonly aliasAttribute = "alias";
@@ -120,12 +122,16 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
 
   async batchGetUsers(aliases: string[]): Promise<UserDto[]> {
     if (aliases && aliases.length > 0) {
-      // Deduplicate the aliases (only necessary if used in cases where there can be duplicates)
-      const namesWithoutDuplicates = [...new Set(aliases)];
-
-      const keys = namesWithoutDuplicates.map<Record<string, {}>>((alias) => ({
-        [this.aliasAttribute]: alias,
-      }));
+      const keys: PrimaryKey[] = [];
+      const alreadyEntered: { [alias: string]: boolean } = {};
+      aliases.forEach((alias) => {
+        if (!(alias in alreadyEntered)) {
+          alreadyEntered[alias] = true;
+          keys.push({
+            [this.aliasAttribute]: alias,
+          });
+        }
+      });
 
       const params = {
         RequestItems: {
@@ -134,15 +140,20 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
           },
         },
       };
-      console.log(aliases);
-      console.log(params, keys);
 
       const result = await this.client.send(new BatchGetCommand(params));
 
       if (result.Responses) {
-        return result.Responses[this.tableName].map<UserDto>((item) =>
-          this.userDtoFromItem(item)
-        );
+        const itemMap: { [key: string]: Record<string, any> } = {};
+        result.Responses[this.tableName].forEach((item) => {
+          itemMap[item.alias] = item;
+        });
+        const users: UserDto[] = [];
+        aliases.forEach((alias) => {
+          if (alias in itemMap)
+            users.push(this.userDtoFromItem(itemMap[alias]));
+        });
+        return users;
       }
     }
 

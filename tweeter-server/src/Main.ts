@@ -1,8 +1,8 @@
-import { handler } from "./lambda/status/GetFeedsLambda";
+import { handler } from "./lambda/follow/GetFollowersLambda";
 
 handler({
-  token: "0732f980-21a5-4db1-9443-81daabcf5da5",
-  userAlias: "@jeff",
+  token: "e3d87817-cf98-4f85-abbe-908c207dc556",
+  userAlias: "@ben",
   pageSize: 10,
   lastItem: undefined,
 }).then((response) => {

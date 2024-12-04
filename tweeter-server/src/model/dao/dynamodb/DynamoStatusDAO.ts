@@ -1,9 +1,23 @@
-import { DeleteCommand, PutCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
+import {
+  BatchWriteCommandInput,
+  DeleteCommand,
+  PutCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 
 import { StatusDto, StatusWithAliasDto } from "tweeter-shared";
 import { DataPage } from "../DataPage";
 import { StatusDAO } from "../StatusDAO";
 import { DynamoDAO } from "./DynamoDAO";
+
+type DeleteRequestItem = {
+  DeleteRequest: {
+    Key: {
+      receiverAlias: string;
+      dateAndAlias: string | undefined;
+    };
+  };
+};
 
 export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   readonly storyTableName = "Story";
@@ -33,7 +47,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       const feedParams = {
         RequestItems: {
           [this.feedTableName]: this.createPutFeedRequestItems(
-            status,
+            this.aliasStatusFromStatusDto(status),
             followerAliases
           ),
         },
@@ -42,6 +56,55 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       await this.runRetryingBatchWriteCommand(
         feedParams,
         "batch writing feeds"
+      );
+    }
+  }
+
+  async addStoryToFeed(
+    followerAlias: string,
+    followeeAlias: string
+  ): Promise<void> {
+    const page = await this.getPageOfStory(followeeAlias, undefined, 25);
+
+    if (page.values.length > 0) {
+      const feedParams = {
+        RequestItems: {
+          [this.feedTableName]: page.values.map((statusWithAlias) =>
+            this.createPutFeedRequest(statusWithAlias, followerAlias)
+          ),
+        },
+      };
+
+      await this.runRetryingBatchWriteCommand(
+        feedParams,
+        "batch writing feeds"
+      );
+    }
+  }
+
+  async removeStoryFromFeed(
+    followerAlias: string,
+    followeeAlias: string
+  ): Promise<void> {
+    const page = await this.getPageOfFeed(followerAlias, undefined, 25);
+    const requestItems: DeleteRequestItem[] = [];
+    page.values.forEach((statusWithAliasDto) => {
+      if (statusWithAliasDto.userAlias === followeeAlias)
+        requestItems.push(
+          this.createDeleteFeedRequest(statusWithAliasDto, followerAlias)
+        );
+    });
+
+    if (requestItems.length > 0) {
+      const feedParams: BatchWriteCommandInput = {
+        RequestItems: {
+          [this.feedTableName]: requestItems,
+        },
+      };
+
+      await this.runRetryingBatchWriteCommand(
+        feedParams,
+        "batch deleting feeds"
       );
     }
   }
@@ -100,7 +163,9 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       this.receiverAliasAttribute,
       this.feedDateAliasAttribute,
       this.feedTableName,
-      this.generateFeedSortKey(lastLocation),
+      this.generateFeedSortKey(
+        lastLocation ? this.aliasStatusFromStatusDto(lastLocation) : undefined
+      ),
       limit
     );
   }
@@ -143,18 +208,11 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   }
 
   private generateFeedSortKey(
-    status: StatusDto | undefined
+    status: StatusWithAliasDto | undefined
   ): string | undefined {
     if (status === undefined) return undefined;
     const date = new Date(status.timestamp);
-    return date.toISOString() + status.user.alias;
-  }
-
-  private generateFeedPrimaryKey(status: StatusDto, followerAlias: string) {
-    return {
-      [this.receiverAliasAttribute]: followerAlias,
-      [this.feedDateAliasAttribute]: this.generateFeedSortKey(status),
-    };
+    return date.toISOString() + status.userAlias;
   }
 
   private generateStoryPrimaryKey(status: StatusDto) {
@@ -165,7 +223,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   }
 
   private createPutFeedRequestItems(
-    status: StatusDto,
+    status: StatusWithAliasDto,
     followerAliases: string[]
   ) {
     return followerAliases.map((alias) =>
@@ -173,10 +231,13 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
     );
   }
 
-  private createPutFeedRequest(status: StatusDto, followerAlias: string) {
+  private createPutFeedRequest(
+    status: StatusWithAliasDto,
+    followerAlias: string
+  ) {
     const item = {
       [this.receiverAliasAttribute]: followerAlias,
-      [this.senderAliasAttribute]: status.user.alias,
+      [this.senderAliasAttribute]: status.userAlias,
       [this.timestampAttribute]: status.timestamp,
       [this.feedDateAliasAttribute]: this.generateFeedSortKey(status),
       [this.postAttribute]: status.post,
@@ -194,11 +255,14 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
     followerAliases: string[]
   ) {
     return followerAliases.map((alias) =>
-      this.createDeleteFeedRequest(status, alias)
+      this.createDeleteFeedRequest(this.aliasStatusFromStatusDto(status), alias)
     );
   }
 
-  private createDeleteFeedRequest(status: StatusDto, followerAlias: string) {
+  private createDeleteFeedRequest(
+    status: StatusWithAliasDto,
+    followerAlias: string
+  ): DeleteRequestItem {
     const key = {
       [this.receiverAliasAttribute]: followerAlias,
       [this.feedDateAliasAttribute]: this.generateFeedSortKey(status),
@@ -208,6 +272,14 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       DeleteRequest: {
         Key: key,
       },
+    };
+  }
+
+  private aliasStatusFromStatusDto(status: StatusDto): StatusWithAliasDto {
+    return {
+      post: status.post,
+      userAlias: status.user.alias,
+      timestamp: status.timestamp,
     };
   }
 }

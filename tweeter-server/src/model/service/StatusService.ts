@@ -60,8 +60,6 @@ export class StatusService {
     aliasStatuses: StatusWithAliasDto[]
   ): Promise<StatusDto[]> {
     const userAliases = aliasStatuses.map((item) => item.userAlias);
-    console.log("---------------");
-    console.log(aliasStatuses);
     const users = await this.userDao.batchGetUsers(userAliases);
     const userDict: { [key: string]: UserDto } = {};
     users.forEach((user) => {
