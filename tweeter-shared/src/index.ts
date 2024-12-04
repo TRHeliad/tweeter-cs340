@@ -37,3 +37,4 @@ export type { GetUserResponse } from "./model/net/response/GetUserResponse";
 
 // Other
 export { FakeData } from "./util/FakeData";
+export type { HasEqual } from "./model/domain/HasEqual";

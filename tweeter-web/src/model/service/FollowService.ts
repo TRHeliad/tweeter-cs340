@@ -8,11 +8,11 @@ export class FollowService extends TweeterWebService {
     pageSize: number,
     lastItem: User | null
   ): Promise<[User[], boolean]> {
-    return this.serverFacade.getFollowees({
+    return this.serverFacade.getFollowers({
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem ? lastItem.dto : null,
+      lastItem: lastItem ? lastItem.dto : undefined,
     });
   }
 
@@ -26,7 +26,7 @@ export class FollowService extends TweeterWebService {
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem ? lastItem.dto : null,
+      lastItem: lastItem ? lastItem.dto : undefined,
     });
   }
 
@@ -76,7 +76,7 @@ export class FollowService extends TweeterWebService {
     authToken: AuthToken,
     user: User
   ): Promise<number> {
-    return this.serverFacade.getFolloweeCount({
+    return this.serverFacade.getFollowerCount({
       token: authToken.token,
       user: user.dto,
     });

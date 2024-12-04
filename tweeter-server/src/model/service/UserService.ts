@@ -5,15 +5,19 @@ import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { UserDAO } from "../dao/UserDAO";
 import { SessionDAO } from "../dao/SessionDAO";
 import { SessionService } from "./SessionService";
+import { hashSync, compareSync } from "bcryptjs";
+import { UserImageDAO } from "../dao/UserImageDAO";
 
 export class UserService {
   private readonly userDao: UserDAO;
   private readonly sessionDao: SessionDAO;
+  private readonly userImageDao: UserImageDAO;
   private readonly sessionService: SessionService;
 
   constructor(daoFactory: TweeterDAOFactory) {
     this.userDao = daoFactory.getUserDAO();
     this.sessionDao = daoFactory.getSessionDAO();
+    this.userImageDao = daoFactory.getUserImageDAO();
     this.sessionService = new SessionService(daoFactory);
   }
 
@@ -28,7 +32,7 @@ export class UserService {
     const fullUserDto = await this.userDao.getFullUser(alias);
     if (
       fullUserDto == undefined ||
-      this.hashPassword(password) !== fullUserDto.passwordHash
+      !compareSync(password, fullUserDto.passwordHash)
     )
       throw new Error("Invalid alias or password");
 
@@ -55,8 +59,7 @@ export class UserService {
     if (existingUser !== undefined)
       throw new Error("[Bad Request] Alias taken");
 
-    // upload image to s3 here
-    const imageUrl = "";
+    const imageUrl = await this.userImageDao.putImage(alias, userImageBytes);
 
     const fullUserDto = {
       alias: alias,
@@ -64,6 +67,8 @@ export class UserService {
       firstName: firstName,
       lastName: lastName,
       imageUrl: imageUrl,
+      followerCount: 0,
+      followeeCount: 0,
     };
 
     await this.userDao.putUser(fullUserDto);
@@ -80,6 +85,6 @@ export class UserService {
   }
 
   private hashPassword(password: string): string {
-    return password;
+    return hashSync(password, 3);
   }
 }

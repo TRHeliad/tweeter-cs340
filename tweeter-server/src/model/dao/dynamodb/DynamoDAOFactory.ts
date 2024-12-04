@@ -7,6 +7,8 @@ import { DynamoSessionDAO } from "./DynamoSessionDAO";
 import { DynamoFollowDAO } from "./DynamoFollowDAO";
 import { DynamoStatusDAO } from "./DynamoStatusDAO";
 import { DynamoUserDAO } from "./DynamoUserDAO";
+import { UserImageDAO } from "../UserImageDAO";
+import { S3UserImageDAO } from "./S3UserImageDAO";
 
 export class DynamoDAOFactory implements TweeterDAOFactory {
   getFollowDAO(): FollowDAO {
@@ -23,5 +25,9 @@ export class DynamoDAOFactory implements TweeterDAOFactory {
 
   getStatusDAO(): StatusDAO {
     return new DynamoStatusDAO();
+  }
+
+  getUserImageDAO(): UserImageDAO {
+    return new S3UserImageDAO();
   }
 }

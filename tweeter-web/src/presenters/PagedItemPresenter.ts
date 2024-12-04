@@ -1,4 +1,4 @@
-import { AuthToken } from "tweeter-shared";
+import { AuthToken, HasEqual } from "tweeter-shared";
 import { Presenter, View } from "./Presenter";
 
 export const PAGE_SIZE = 10;
@@ -7,9 +7,10 @@ export interface PagedItemView<A> extends View {
   addItems: (newItems: A[]) => void;
 }
 
-export abstract class PagedItemPresenter<A, B> extends Presenter<
-  PagedItemView<A>
-> {
+export abstract class PagedItemPresenter<
+  A extends HasEqual<A>,
+  B
+> extends Presenter<PagedItemView<A>> {
   private _hasMoreItems = true;
   private _lastItem: A | null = null;
   private _service: B;

@@ -17,6 +17,8 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
   readonly firstNameAttribute = "firstName";
   readonly lastNameAttribute = "lastName";
   readonly imageUrlAttribute = "imageUrl";
+  readonly followerCountAttribute = "followerCount";
+  readonly followeeCountAttribute = "followeeCount";
 
   async putUser(registration: FullUserDto): Promise<void> {
     const params = {
@@ -27,6 +29,8 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
         [this.firstNameAttribute]: registration.firstName,
         [this.lastNameAttribute]: registration.lastName,
         [this.imageUrlAttribute]: registration.imageUrl,
+        [this.followerCountAttribute]: 0,
+        [this.followeeCountAttribute]: 0,
       },
     };
     await this.client.send(new PutCommand(params));
@@ -66,6 +70,8 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
           firstName: output.Item[this.firstNameAttribute],
           lastName: output.Item[this.lastNameAttribute],
           imageUrl: output.Item[this.imageUrlAttribute],
+          followerCount: output.Item[this.followerCountAttribute],
+          followeeCount: output.Item[this.followeeCountAttribute],
         };
   }
 
@@ -90,6 +96,28 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
     await this.client.send(new UpdateCommand(params));
   }
 
+  async updateFollowCount(
+    alias: string,
+    followerCount: number,
+    followeeCount: number
+  ): Promise<void> {
+    const params = {
+      TableName: this.tableName,
+      Key: { [this.aliasAttribute]: alias },
+      ExpressionAttributeValues: {
+        ":fer": followerCount,
+        ":fee": followeeCount,
+      },
+      UpdateExpression:
+        "SET " +
+        this.followerCountAttribute +
+        " = :fer, " +
+        this.followeeCountAttribute +
+        " = :fee",
+    };
+    await this.client.send(new UpdateCommand(params));
+  }
+
   async batchGetUsers(aliases: string[]): Promise<UserDto[]> {
     if (aliases && aliases.length > 0) {
       // Deduplicate the aliases (only necessary if used in cases where there can be duplicates)
@@ -110,8 +138,9 @@ export class DynamoUserDAO extends DynamoDAO implements UserDAO {
       const result = await this.client.send(new BatchGetCommand(params));
 
       if (result.Responses) {
-        return result.Responses[this.tableName].map<UserDto>(
-          this.userDtoFromItem
+        console.log(result.Responses);
+        return result.Responses[this.tableName].map<UserDto>((item) =>
+          this.userDtoFromItem(item)
         );
       }
     }

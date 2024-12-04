@@ -6,15 +6,16 @@ import {
   PagedItemPresenter,
   PagedItemView,
 } from "../../presenters/PagedItemPresenter";
+import { HasEqual } from "tweeter-shared";
 
 export const PAGE_SIZE = 10;
 
-interface Props<A, B> {
+interface Props<A extends HasEqual<A>, B> {
   presenterGenerator: (view: PagedItemView<A>) => PagedItemPresenter<A, B>;
   itemComponentGenerator: (item: A) => JSX.Element;
 }
 
-function ItemScroller<A, B>(props: Props<A, B>) {
+function ItemScroller<A extends HasEqual<A>, B>(props: Props<A, B>) {
   const { displayErrorMessage } = useToastListener();
   const [items, setItems] = useState<A[]>([]);
   const [newItems, setNewItems] = useState<A[]>([]);

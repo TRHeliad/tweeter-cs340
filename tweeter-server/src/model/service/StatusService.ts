@@ -1,4 +1,4 @@
-import { StatusDto, StatusWithAliasDto } from "tweeter-shared";
+import { StatusDto, StatusWithAliasDto, UserDto } from "tweeter-shared";
 import { StatusDAO } from "../dao/StatusDAO";
 import { TweeterDAOFactory } from "../dao/TweeterDAOFactory";
 import { SessionService } from "./SessionService";
@@ -61,11 +61,15 @@ export class StatusService {
   ): Promise<StatusDto[]> {
     const userAliases = aliasStatuses.map((item) => item.userAlias);
     const users = await this.userDao.batchGetUsers(userAliases);
+    const userDict: { [key: string]: UserDto } = {};
+    users.forEach((user) => {
+      userDict[user.alias] = user;
+    });
     const statuses: StatusDto[] = [];
     for (let i = 0; i < aliasStatuses.length; i++) {
       statuses[i] = {
         post: aliasStatuses[i].post,
-        user: users[i],
+        user: userDict[aliasStatuses[i].userAlias],
         timestamp: aliasStatuses[i].timestamp,
       };
     }
