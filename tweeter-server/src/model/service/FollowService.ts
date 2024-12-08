@@ -28,42 +28,71 @@ export class FollowService {
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: UserDto | undefined
+    lastItem: string | undefined
   ): Promise<[UserDto[], boolean]> {
-    this.sessionService.throwOnInvalidAuthToken(token);
-
-    const page = await this.followDao.getPageOfFollowers(
+    const [followerAliases, hasMorePages] = await this.getFollowerAliases(
+      token,
       userAlias,
-      lastItem?.alias,
-      pageSize
+      pageSize,
+      lastItem
     );
-    const aliasFollows = page.values;
-
-    const followerAliases = aliasFollows.map((item) => item.followerAlias);
     const followers = await this.userDao.batchGetUsers(followerAliases);
-
-    return [followers, page.hasMorePages];
+    return [followers, hasMorePages];
   }
 
   public async loadMoreFollowees(
     token: string,
     userAlias: string,
     pageSize: number,
-    lastItem: UserDto | undefined
+    lastItem: string | undefined
   ): Promise<[UserDto[], boolean]> {
     this.sessionService.throwOnInvalidAuthToken(token);
+    const [followeeAliases, hasMorePages] = await this.getFolloweeAliases(
+      token,
+      userAlias,
+      pageSize,
+      lastItem
+    );
+    const followees = await this.userDao.batchGetUsers(followeeAliases);
+    return [followees, hasMorePages];
+  }
+
+  public async getFollowerAliases(
+    token: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: string | undefined,
+    alreadyVerified: boolean = false
+  ): Promise<[string[], boolean]> {
+    if (!alreadyVerified) this.sessionService.throwOnInvalidAuthToken(token);
+
+    const page = await this.followDao.getPageOfFollowers(
+      userAlias,
+      lastItem,
+      pageSize
+    );
+    const followerAliases = page.values.map((item) => item.followerAlias);
+
+    return [followerAliases, page.hasMorePages];
+  }
+
+  public async getFolloweeAliases(
+    token: string,
+    userAlias: string,
+    pageSize: number,
+    lastItem: string | undefined,
+    alreadyVerified: boolean = false
+  ): Promise<[string[], boolean]> {
+    if (!alreadyVerified) this.sessionService.throwOnInvalidAuthToken(token);
 
     const page = await this.followDao.getPageOfFollowees(
       userAlias,
-      lastItem?.alias,
+      lastItem,
       pageSize
     );
-    const aliasFollows = page.values;
+    const followeeAliases = page.values.map((item) => item.followeeAlias);
 
-    const followeeAliases = aliasFollows.map((item) => item.followeeAlias);
-    const followees = await this.userDao.batchGetUsers(followeeAliases);
-
-    return [followees, page.hasMorePages];
+    return [followeeAliases, page.hasMorePages];
   }
 
   public async follow(

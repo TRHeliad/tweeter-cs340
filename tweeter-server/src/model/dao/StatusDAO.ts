@@ -3,7 +3,10 @@ import { DataPage } from "./DataPage";
 
 export interface StatusDAO {
   putStory: (status: StatusDto) => Promise<void>;
-  putFeeds: (status: StatusDto, followerAliases: string[]) => Promise<void>;
+  putFeeds: (
+    status: StatusWithAliasDto,
+    followerAliases: string[]
+  ) => Promise<void>;
 
   addStoryToFeed: (
     followerAlias: string,

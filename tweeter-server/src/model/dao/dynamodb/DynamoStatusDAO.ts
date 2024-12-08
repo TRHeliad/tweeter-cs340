@@ -42,12 +42,15 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
     await this.client.send(new PutCommand(storyParams));
   }
 
-  async putFeeds(status: StatusDto, followerAliases: string[]): Promise<void> {
+  async putFeeds(
+    status: StatusWithAliasDto,
+    followerAliases: string[]
+  ): Promise<void> {
     if (followerAliases && followerAliases.length > 0) {
       const feedParams = {
         RequestItems: {
           [this.feedTableName]: this.createPutFeedRequestItems(
-            this.aliasStatusFromStatusDto(status),
+            status,
             followerAliases
           ),
         },

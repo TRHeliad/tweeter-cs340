@@ -76,20 +76,19 @@ export class StatusService {
     return statuses;
   }
 
-  public async postStatus(token: string, newStatus: StatusDto): Promise<void> {
-    const [isValidToken, sessionDto] =
-      await this.sessionService.isValidAuthToken(token);
-    if (!isValidToken) throw this.sessionService.unauthenticatedError;
+  public async postStory(
+    token: string,
+    newStatus: StatusDto,
+    alreadyVerified: boolean = false
+  ): Promise<void> {
+    if (!alreadyVerified) this.sessionService.throwOnInvalidAuthToken(token);
+    await this.statusDao.putStory(newStatus);
+  }
 
-    this.statusDao.putStory(newStatus);
-
-    // replace with milestone 4B
-    const page = await this.followDao.getPageOfFollowers(
-      sessionDto!.userAlias,
-      undefined,
-      25
-    );
-    const followerAliases = page.values.map((item) => item.followerAlias);
+  public async postFeeds(
+    newStatus: StatusWithAliasDto,
+    followerAliases: string[]
+  ) {
     await this.statusDao.putFeeds(newStatus, followerAliases);
   }
 }

@@ -14,6 +14,7 @@ export type { FollowAliasesDto } from "./model/dto/FollowAliasesDto";
 export type { StatusWithAliasDto } from "./model/dto/StatusWithAliasDto";
 export type { AuthTokenDto } from "./model/dto/AuthTokenDto";
 export type { SessionDto } from "./model/dto/SessionDto";
+export type { FeedUpdateDto } from "./model/dto/FeedUpdateDto";
 
 // Requests
 export type { TweeterRequest } from "./model/net/request/TweeterRequest";
@@ -37,4 +38,3 @@ export type { GetUserResponse } from "./model/net/response/GetUserResponse";
 
 // Other
 export { FakeData } from "./util/FakeData";
-export type { HasEqual } from "./model/domain/HasEqual";

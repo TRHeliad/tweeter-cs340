@@ -40,14 +40,14 @@ export class ServerFacade {
     throw new Error(response.message ?? undefined);
   }
 
-  private async getMorePagedItems<DtoType, ModelType>(
-    request: PagedItemRequest<DtoType>,
+  private async getMorePagedItems<ReqItemType, DtoType, ModelType>(
+    request: PagedItemRequest<ReqItemType>,
     methodPath: string,
     noneFoundMessage: string,
     fromDto: (dto: DtoType) => ModelType | null
   ): Promise<[ModelType[], boolean]> {
     const response = await this.clientCommunicator.doPost<
-      PagedItemRequest<DtoType>,
+      PagedItemRequest<ReqItemType>,
       PagedItemResponse<DtoType>
     >(request, methodPath);
 
@@ -70,9 +70,9 @@ export class ServerFacade {
   }
 
   public async getFollowees(
-    request: PagedItemRequest<UserDto>
+    request: PagedItemRequest<string>
   ): Promise<[User[], boolean]> {
-    return this.getMorePagedItems<UserDto, User>(
+    return this.getMorePagedItems<string, UserDto, User>(
       request,
       "/follow/get-followees",
       "No followees found",
@@ -81,9 +81,9 @@ export class ServerFacade {
   }
 
   public async getFollowers(
-    request: PagedItemRequest<UserDto>
+    request: PagedItemRequest<string>
   ): Promise<[User[], boolean]> {
-    return this.getMorePagedItems<UserDto, User>(
+    return this.getMorePagedItems<string, UserDto, User>(
       request,
       "/follow/get-followers",
       "No followers found",
@@ -167,7 +167,7 @@ export class ServerFacade {
   public async getStories(
     request: PagedItemRequest<StatusDto>
   ): Promise<[Status[], boolean]> {
-    return this.getMorePagedItems<StatusDto, Status>(
+    return this.getMorePagedItems<StatusDto, StatusDto, Status>(
       request,
       "/status/get-stories",
       "No stories found",
@@ -178,7 +178,7 @@ export class ServerFacade {
   public async getFeeds(
     request: PagedItemRequest<StatusDto>
   ): Promise<[Status[], boolean]> {
-    return this.getMorePagedItems<StatusDto, Status>(
+    return this.getMorePagedItems<StatusDto, StatusDto, Status>(
       request,
       "/status/get-feeds",
       "No feeds found",

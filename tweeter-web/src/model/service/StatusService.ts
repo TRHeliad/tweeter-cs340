@@ -12,7 +12,7 @@ export class StatusService extends TweeterWebService {
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem?.dto ?? null,
+      lastItem: lastItem?.dto,
     });
   }
 
@@ -27,7 +27,7 @@ export class StatusService extends TweeterWebService {
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem?.dto ?? null,
+      lastItem: lastItem?.dto,
     });
   }
 

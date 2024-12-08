@@ -12,7 +12,7 @@ export class FollowService extends TweeterWebService {
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem ? lastItem.dto : undefined,
+      lastItem: lastItem ? lastItem.alias : undefined,
     });
   }
 
@@ -26,7 +26,7 @@ export class FollowService extends TweeterWebService {
       token: authToken.token,
       userAlias: userAlias,
       pageSize: pageSize,
-      lastItem: lastItem ? lastItem.dto : undefined,
+      lastItem: lastItem ? lastItem.alias : undefined,
     });
   }
 
