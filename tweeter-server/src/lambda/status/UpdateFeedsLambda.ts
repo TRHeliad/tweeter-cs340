@@ -1,32 +1,5 @@
-import { FeedUpdateDto, StatusWithAliasDto } from "tweeter-shared";
-import { SendMessageCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { FeedUpdateDto } from "tweeter-shared";
 import { createStatusService } from "./CreateStatusService";
-
-let sqsClient = new SQSClient();
-
-async function addToFeedQueue(
-  newStatus: StatusWithAliasDto,
-  followerAliases: string[]
-): Promise<void> {
-  const sqs_url =
-    "https://sqs.us-west-2.amazonaws.com/954680681479/ExerciseQueue";
-  const feedUpdate: FeedUpdateDto = {
-    Status: newStatus,
-    Followers: followerAliases,
-  };
-  const messageBody = JSON.stringify(feedUpdate);
-
-  const params = {
-    MessageBody: messageBody,
-    QueueUrl: sqs_url,
-  };
-
-  try {
-    await sqsClient.send(new SendMessageCommand(params));
-  } catch (err) {
-    throw err;
-  }
-}
 
 export const handler = async function (event: any) {
   const statusService = createStatusService();
