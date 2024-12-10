@@ -47,7 +47,13 @@ export class StatusService {
 
     const page = await this.statusDao.getPageOfFeed(
       userAlias,
-      lastItem,
+      lastItem
+        ? {
+            post: lastItem.post,
+            timestamp: lastItem.timestamp,
+            userAlias: lastItem.user.alias,
+          }
+        : undefined,
       pageSize
     );
     const aliasStatuses = page.values;

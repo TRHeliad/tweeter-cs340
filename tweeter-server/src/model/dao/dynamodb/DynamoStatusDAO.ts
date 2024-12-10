@@ -19,6 +19,18 @@ type DeleteRequestItem = {
   };
 };
 
+type PutRequestItem = {
+  PutRequest: {
+    Item: {
+      receiverAlias: string;
+      senderAlias: string;
+      creationTimestamp: number;
+      dateAndAlias: string;
+      post: string;
+    };
+  };
+};
+
 export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   readonly storyTableName = "Story";
   readonly senderAliasAttribute = "senderAlias";
@@ -67,48 +79,85 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
     followerAlias: string,
     followeeAlias: string
   ): Promise<void> {
-    const page = await this.getPageOfStory(followeeAlias, undefined, 25);
+    const getReferencePage = (lastItem: number | undefined) =>
+      this.getPageOfStory(followeeAlias, lastItem, 25);
+    const getLastItemFromPage = (page: DataPage<StatusWithAliasDto>) => {
+      if (page.values.length > 0) return page.values.at(-1)?.timestamp;
+    };
+    const createUpdateFeedRequest = (
+      status: StatusWithAliasDto,
+      alias: string
+    ) => this.createPutFeedRequest(status, alias);
 
-    if (page.values.length > 0) {
-      const feedParams = {
-        RequestItems: {
-          [this.feedTableName]: page.values.map((statusWithAlias) =>
-            this.createPutFeedRequest(statusWithAlias, followerAlias)
-          ),
-        },
-      };
-
-      await this.runRetryingBatchWriteCommand(
-        feedParams,
-        "batch writing feeds"
-      );
-    }
+    this.updateFeedFromStory(
+      getReferencePage,
+      getLastItemFromPage,
+      followerAlias,
+      createUpdateFeedRequest
+    );
   }
 
   async removeStoryFromFeed(
     followerAlias: string,
     followeeAlias: string
   ): Promise<void> {
-    const page = await this.getPageOfFeed(followerAlias, undefined, 25);
-    const requestItems: DeleteRequestItem[] = [];
-    page.values.forEach((statusWithAliasDto) => {
-      if (statusWithAliasDto.userAlias === followeeAlias)
-        requestItems.push(
-          this.createDeleteFeedRequest(statusWithAliasDto, followerAlias)
+    const getReferencePage = (lastItem: StatusWithAliasDto | undefined) =>
+      this.getPageOfFeed(followerAlias, lastItem, 25);
+    const getLastItemFromPage = (page: DataPage<StatusWithAliasDto>) => {
+      if (page.values.length > 0) return page.values.at(-1);
+    };
+    const createUpdateFeedRequest = (
+      status: StatusWithAliasDto,
+      alias: string
+    ) => {
+      if (status.userAlias === followeeAlias)
+        return this.createDeleteFeedRequest(status, alias);
+    };
+
+    this.updateFeedFromStory(
+      getReferencePage,
+      getLastItemFromPage,
+      followerAlias,
+      createUpdateFeedRequest
+    );
+  }
+
+  private async updateFeedFromStory<T>(
+    getReferencePage: (
+      lastItem: T | undefined
+    ) => Promise<DataPage<StatusWithAliasDto>>,
+    getLastItemFromPage: (page: DataPage<StatusWithAliasDto>) => T | undefined,
+    feedAlias: string,
+    createUpdateFeedRequest: (
+      status: StatusWithAliasDto,
+      alias: string
+    ) => DeleteRequestItem | PutRequestItem | undefined
+  ): Promise<void> {
+    let hasMore = true;
+    let lastItem: T | undefined;
+    while (hasMore) {
+      const page = await getReferencePage(lastItem);
+      hasMore = page.hasMorePages;
+
+      const requests: (DeleteRequestItem | PutRequestItem)[] = [];
+      page.values.forEach((statusWithAlias) => {
+        const item = createUpdateFeedRequest(statusWithAlias, feedAlias);
+        if (item !== undefined) requests.push(item);
+      });
+
+      if (page.values.length > 0) {
+        lastItem = getLastItemFromPage(page);
+        const feedParams = {
+          RequestItems: {
+            [this.feedTableName]: requests,
+          },
+        };
+
+        await this.runRetryingBatchWriteCommand(
+          feedParams,
+          "batch writing feeds"
         );
-    });
-
-    if (requestItems.length > 0) {
-      const feedParams: BatchWriteCommandInput = {
-        RequestItems: {
-          [this.feedTableName]: requestItems,
-        },
-      };
-
-      await this.runRetryingBatchWriteCommand(
-        feedParams,
-        "batch deleting feeds"
-      );
+      }
     }
   }
 
@@ -158,7 +207,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
 
   async getPageOfFeed(
     alias: string,
-    lastLocation: StatusDto | undefined,
+    lastLocation: StatusWithAliasDto | undefined,
     limit: number
   ): Promise<DataPage<StatusWithAliasDto>> {
     return this.getPageOfStatuses(
@@ -166,9 +215,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       this.receiverAliasAttribute,
       this.feedDateAliasAttribute,
       this.feedTableName,
-      this.generateFeedSortKey(
-        lastLocation ? this.aliasStatusFromStatusDto(lastLocation) : undefined
-      ),
+      this.generateFeedSortKey(lastLocation),
       limit
     );
   }
@@ -188,6 +235,7 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
       },
       TableName: queryTable,
       Limit: limit,
+      ScanIndexForward: false,
       ExclusiveStartKey:
         lastLocation === undefined
           ? undefined
@@ -237,12 +285,12 @@ export class DynamoStatusDAO extends DynamoDAO implements StatusDAO {
   private createPutFeedRequest(
     status: StatusWithAliasDto,
     followerAlias: string
-  ) {
+  ): PutRequestItem {
     const item = {
       [this.receiverAliasAttribute]: followerAlias,
       [this.senderAliasAttribute]: status.userAlias,
       [this.timestampAttribute]: status.timestamp,
-      [this.feedDateAliasAttribute]: this.generateFeedSortKey(status),
+      [this.feedDateAliasAttribute]: this.generateFeedSortKey(status)!,
       [this.postAttribute]: status.post,
     };
 

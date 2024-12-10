@@ -28,7 +28,7 @@ export interface StatusDAO {
 
   getPageOfFeed: (
     alias: string,
-    lastLocation: StatusDto | undefined,
+    lastLocation: StatusWithAliasDto | undefined,
     limit: number
   ) => Promise<DataPage<StatusWithAliasDto>>;
 }
