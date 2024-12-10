@@ -9,7 +9,7 @@ async function addToFeedQueue(
   followerAliases: string[]
 ): Promise<void> {
   const sqs_url =
-    "https://sqs.us-west-2.amazonaws.com/954680681479/ExerciseQueue";
+    "https://sqs.us-west-2.amazonaws.com/954680681479/TweeterUpdateFeedQueue";
   const feedUpdate: FeedUpdateDto = {
     Status: newStatus,
     Followers: followerAliases,

@@ -12,7 +12,7 @@ let sqsClient = new SQSClient();
 
 async function addToPostQueue(newStatus: StatusWithAliasDto): Promise<void> {
   const sqs_url =
-    "https://sqs.us-west-2.amazonaws.com/954680681479/ExerciseQueue";
+    "https://sqs.us-west-2.amazonaws.com/954680681479/TweeterPostStatusQueue";
   const messageBody = JSON.stringify(newStatus);
 
   const params = {
