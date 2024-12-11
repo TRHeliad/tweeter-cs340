@@ -51,8 +51,8 @@ export const handler = async function (event: any) {
       lastItem = followerAliases.at(-1);
 
       const followerChunks = [];
-      for (let i = 0; i < followerAliases.length; i += 100) {
-        followerChunks.push(followerAliases.slice(i, i + 100));
+      for (let i = 0; i < followerAliases.length; i += 250) {
+        followerChunks.push(followerAliases.slice(i, i + 250));
       }
 
       console.log("post", followerAliases.length, ++totalPosts);

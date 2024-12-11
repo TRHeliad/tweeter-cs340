@@ -7,8 +7,7 @@ export const handler = async function (event: any) {
   console.log("processing new event", event.Records.length);
 
   for (let i = 0; i < event.Records.length; ++i) {
-    const startTimeMillis = Date.now();
-
+    let startTimeMillis = Date.now();
     const { body } = event.Records[i];
     const feedUpdate: FeedUpdateDto = JSON.parse(body);
 
@@ -18,17 +17,39 @@ export const handler = async function (event: any) {
       followerChunks.push(feedUpdate.Followers.slice(i, i + 25));
     }
 
-    followerChunks.forEach(async (followerChunk) => {
+    // let k = 0;
+    for (let k = 0; k < followerChunks.length; ++k) {
+      const followerChunk = followerChunks[k];
+      // if (k % 4 == 0 && k != 0) startTimeMillis = Date.now();
+      startTimeMillis = Date.now();
+
       await statusService.postFeeds(feedUpdate.Status, followerChunk);
-    });
+
+      const elapsedTime = Date.now() - startTimeMillis;
+      if (elapsedTime < 250) {
+        await new Promise<void>((resolve) =>
+          setTimeout(resolve, 250 - elapsedTime)
+        );
+      }
+
+      // if ((k + 1) % 4 == 0) {
+      //   const elapsedTime = Date.now() - startTimeMillis;
+      //   if (elapsedTime < 1000) {
+      //     await new Promise<void>((resolve) =>
+      //       setTimeout(resolve, 1000 - elapsedTime)
+      //     );
+      //   }
+      // }
+      // k++;
+    }
 
     // Size of a message indicates WCU, only do one message per second
-    const elapsedTime = Date.now() - startTimeMillis;
-    if (elapsedTime < 1000) {
-      await new Promise<void>((resolve) =>
-        setTimeout(resolve, 1000 - elapsedTime)
-      );
-    }
+    // const elapsedTime = Date.now() - startTimeMillis;
+    // if (elapsedTime < 1000) {
+    //   await new Promise<void>((resolve) =>
+    //     setTimeout(resolve, 1000 - elapsedTime)
+    //   );
+    // }
   }
   return null;
 };
