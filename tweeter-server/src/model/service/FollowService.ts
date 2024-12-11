@@ -63,7 +63,7 @@ export class FollowService {
     pageSize: number,
     lastItem: string | undefined,
     alreadyVerified: boolean = false
-  ): Promise<[string[], boolean]> {
+  ): Promise<[followers: string[], hasMore: boolean]> {
     if (!alreadyVerified) this.sessionService.throwOnInvalidAuthToken(token);
 
     const page = await this.followDao.getPageOfFollowers(
@@ -82,7 +82,7 @@ export class FollowService {
     pageSize: number,
     lastItem: string | undefined,
     alreadyVerified: boolean = false
-  ): Promise<[string[], boolean]> {
+  ): Promise<[followees: string[], hasMore: boolean]> {
     if (!alreadyVerified) this.sessionService.throwOnInvalidAuthToken(token);
 
     const page = await this.followDao.getPageOfFollowees(

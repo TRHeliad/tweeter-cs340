@@ -4,6 +4,8 @@ import { createStatusService } from "./CreateStatusService";
 export const handler = async function (event: any) {
   const statusService = createStatusService();
 
+  console.log("processing new event", event.Records.length);
+
   for (let i = 0; i < event.Records.length; ++i) {
     const startTimeMillis = Date.now();
 
